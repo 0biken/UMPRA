@@ -12,7 +12,7 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
   AC: repo builds nothing yet; MIT file present; no secrets.
 - [x] **T-002 Scaffold app** [CORE]. needs T-001. Next.js App Router + TS strict + Tailwind + shadcn/ui + Vitest + ESLint. Add all scripts listed in `AGENTS.md`.
   AC: `npm run dev/build/lint/typecheck/test` all pass on a blank page.
-- [ ] **T-003 Env handling** [CORE]. needs T-002. `src/server/env.ts` validates env with zod and fails fast; `.env.example` lists every var in `02 §Env vars`.
+- [x] **T-003 Env handling** [CORE]. needs T-002. `src/server/env.ts` validates env with zod and fails fast; `.env.example` lists every var in `02 §Env vars`.
   AC: app refuses to boot with a missing required var; `.env.example` committed.
 - [ ] **T-004 Design tokens and fonts** [CORE]. needs T-002. Implement `07 §Tokens` in `globals.css`, load fonts with `next/font`, build a `/styleguide` dev page that renders tokens and every component state as they are added.
   AC: tokens match the doc exactly; `/styleguide` renders at 360px without horizontal scroll.
@@ -168,3 +168,4 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 
 - `T-001` — Initialized git repository, added MIT `LICENSE`, `.gitignore`, `README.md` stub, `.env.example`, and organized docs into `docs/` with `AGENTS.md` at root.
 - `T-002` — Scaffolded Next.js 15 App Router with TypeScript strict, Tailwind v4, shadcn/ui config, Vitest, ESLint, and all required npm scripts; set `outputFileTracingRoot` in `next.config.ts` to avoid parent lockfile warnings.
+- `T-003` — Implemented `src/server/env.ts` with Zod fail-fast validation (enforcing `PAYPAL_ENV=sandbox` and 32+ char `SESSION_SECRET`), Next.js `src/instrumentation.ts` boot check, and unit tests in `tests/unit/env.test.ts`.

@@ -5,6 +5,26 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    env: {
+      APP_URL: "http://localhost:3000",
+      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/umpra_test",
+      SESSION_SECRET: "test-session-secret-with-at-least-32-bytes!!",
+      PAYPAL_ENV: "sandbox",
+      PAYPAL_CLIENT_ID: "test-paypal-client-id",
+      PAYPAL_CLIENT_SECRET: "test-paypal-client-secret",
+      PAYPAL_WEBHOOK_ID: "test-paypal-webhook-id",
+      PAYPAL_WEBHOOK_VERIFY: "false",
+      ANTHROPIC_API_KEY: "test-anthropic-key",
+      VISION_MODEL: "claude-sonnet-5-5",
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "test-supabase-service-role-key",
+      SUPABASE_BUCKET: "screenshots",
+      AGENT_SWEEP_SECRET: "test-sweep-secret",
+      DEMO_MODE: "true",
+      MATCH_TIMEOUT_MIN: "30",
+      SECOND_SUBMISSION_TIMEOUT_MIN: "15",
+      RUN_SANDBOX_TESTS: "0",
+    },
   },
   resolve: {
     alias: {
