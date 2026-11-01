@@ -7,7 +7,7 @@ export default defineConfig({
     globals: true,
     env: {
       APP_URL: "http://localhost:3000",
-      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/umpra_test",
+      DATABASE_URL: "pglite://memory",
       SESSION_SECRET: "test-session-secret-with-at-least-32-bytes!!",
       PAYPAL_ENV: "sandbox",
       PAYPAL_CLIENT_ID: "test-paypal-client-id",
