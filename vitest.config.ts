@@ -5,6 +5,17 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    fileParallelism: false,
+    hookTimeout: 30000,
+    testTimeout: 30000,
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+      forks: {
+        singleFork: true,
+      },
+    },
     env: {
       APP_URL: "http://localhost:3000",
       DATABASE_URL: "pglite://memory",

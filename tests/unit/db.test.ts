@@ -1,7 +1,6 @@
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   auditLog,
-  closeDatabase,
   disputes,
   entries,
   matches,
@@ -21,10 +20,6 @@ describe("database schema and migrations (T-005)", () => {
 
   beforeEach(async () => {
     db = await resetTestDatabase();
-  });
-
-  afterAll(async () => {
-    await closeDatabase();
   });
 
   it("applies migrations from empty idempotently and creates all 10 tables", async () => {

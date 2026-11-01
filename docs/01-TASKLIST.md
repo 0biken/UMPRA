@@ -36,81 +36,81 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
 
 ## M2 — Tournament domain
 
-- [ ] **T-020 State machine** [CORE]. needs T-005. `state-machine.ts` with the transition table in `02 §State machine`; pure functions `canTransition`, `assertTransition`.
+- [x] **T-020 State machine** [CORE]. needs T-005. `state-machine.ts` with the transition table in `02 §State machine`; pure functions `canTransition`, `assertTransition`.
   AC: table-driven test covers every valid and invalid transition (EC-state).
-- [ ] **T-021 Bracket generation** [CORE]. needs T-020. Seeded shuffle of 8 players to 7 matches with `next_match_id` and `next_slot`. Seed stored in `tournaments.bracket_seed`.
+- [x] **T-021 Bracket generation** [CORE]. needs T-020. Seeded shuffle of 8 players to 7 matches with `next_match_id` and `next_slot`. Seed stored in `tournaments.bracket_seed`.
   AC: same seed gives the same bracket; every non-final match links to exactly one next match.
-- [ ] **T-022 Bracket advancement** [CORE]. needs T-021. `advanceWinner(matchId)` places the winner in the next slot; activates the next match when both slots are filled.
+- [x] **T-022 Bracket advancement** [CORE]. needs T-021. `advanceWinner(matchId)` places the winner in the next slot; activates the next match when both slots are filled.
   AC: advancing twice changes nothing (idempotent).
-- [ ] **T-023 Payout math** [CORE]. needs T-006. `computePayouts(poolCents, splitBps)`; remainder goes to the last place so the sum equals the pool exactly.
+- [x] **T-023 Payout math** [CORE]. needs T-006. `computePayouts(poolCents, splitBps)`; remainder goes to the last place so the sum equals the pool exactly.
   AC: property tests: sum equals pool, no negatives, deterministic.
-- [ ] **T-024 Tournament service** [CORE]. needs T-020, T-021. Create (from config), open, cancel; split frozen after open; every transition audited.
+- [x] **T-024 Tournament service** [CORE]. needs T-020, T-021. Create (from config), open, cancel; split frozen after open; every transition audited.
   AC: editing the split after open throws.
-- [ ] **T-025 Tournament config schema** [CORE]. needs T-006. Zod schema shared by form and plain-language parser: 8 slots, fee $1 to $20, split sums to 100%.
+- [x] **T-025 Tournament config schema** [CORE]. needs T-006. Zod schema shared by form and plain-language parser: 8 slots, fee $1 to $20, split sums to 100%.
   AC: invalid configs return field-level messages.
-- [ ] **T-026 Audit log service** [CORE]. needs T-005. `audit(tx, {...})` with optional `dedupe_key`; activity feed query.
+- [x] **T-026 Audit log service** [CORE]. needs T-005. `audit(tx, {...})` with optional `dedupe_key`; activity feed query.
   AC: inserting the same `dedupe_key` twice is a no-op.
 
 ## M3 — PayPal money in (see `04`)
 
-- [ ] **T-030 PayPal client** [CORE]. needs T-003, T-006. OAuth token fetch and in-memory cache, typed `fetch` wrapper, request ID support, error mapping. `PayPalClient` interface plus `FakePayPal` for tests.
+- [x] **T-030 PayPal client** [CORE]. needs T-003, T-006. OAuth token fetch and in-memory cache, typed `fetch` wrapper, request ID support, error mapping. `PayPalClient` interface plus `FakePayPal` for tests.
   AC: token refreshes on expiry; a PayPal error becomes an `AppError` with the debug id logged.
 - [ ] **T-031 Sandbox verification** [CORE]. needs T-030. Script `scripts/sandbox-check.ts`: create order, print approval link, capture after manual approval, then a $1 payout to a sandbox personal account.
   AC: Human confirms money moves in and out in the sandbox. **If Payouts fails, stop and tell the human** (see `04 §Fallback`).
-- [ ] **T-032 Join and create order** [CORE]. needs T-024, T-030. `POST /api/tournaments/:id/join`: transaction reserves a slot (pending + paid at most slots), creates the `entries` and `payments` rows, creates the PayPal order with `PayPal-Request-Id = entry-{entryId}`, returns the approval link.
+- [x] **T-032 Join and create order** [CORE]. needs T-024, T-030. `POST /api/tournaments/:id/join`: transaction reserves a slot (pending + paid at most slots), creates the `entries` and `payments` rows, creates the PayPal order with `PayPal-Request-Id = entry-{entryId}`, returns the approval link.
   AC: double-click returns the same order; full tournament returns a clear error.
-- [ ] **T-033 Return, capture, cancel handlers** [CORE]. needs T-032. `GET /api/paypal/return` GETs the order, captures with `capture-{entryId}`, marks entry paid; `/cancel` marks entry cancelled and frees the slot.
+- [x] **T-033 Return, capture, cancel handlers** [CORE]. needs T-032. `GET /api/paypal/return` GETs the order, captures with `capture-{entryId}`, marks entry paid; `/cancel` marks entry cancelled and frees the slot.
   AC: refreshing the return URL never captures twice.
-- [ ] **T-034 Webhook endpoint** [CORE]. needs T-030. Raw-body read, signature verification, `webhook_events` dedupe, handlers for capture, refund, and payout events per `04 §Webhooks`.
+- [x] **T-034 Webhook endpoint** [CORE]. needs T-030. Raw-body read, signature verification, `webhook_events` dedupe, handlers for capture, refund, and payout events per `04 §Webhooks`.
   AC: duplicate and out-of-order deliveries are harmless; bad signature returns 400.
-- [ ] **T-035 Live prize pool** [CORE]. needs T-033. Pool equals the sum of captured, non-refunded payments. Shown on the tournament page, polled or refreshed on a short interval.
+- [x] **T-035 Live prize pool** [CORE]. needs T-033. Pool equals the sum of captured, non-refunded payments. Shown on the tournament page, polled or refreshed on a short interval.
   AC: pool changes only from verified captures and refunds.
-- [ ] **T-036 Overflow protection** [CORE]. needs T-033. If a capture succeeds but the tournament is already full, refund that payment automatically and tell the player.
+- [x] **T-036 Overflow protection** [CORE]. needs T-033. If a capture succeeds but the tournament is already full, refund that payment automatically and tell the player.
   AC: two simultaneous payers for the last slot end with one entry and one refund.
-- [ ] **T-037 Cancel and refund** [CORE]. needs T-033. Host cancels in `draft` or `open`, or the deadline passes with the pool unfilled. Refund every captured payment; state goes `cancelled` then `refunded` once all refunds complete.
+- [x] **T-037 Cancel and refund** [CORE]. needs T-033. Host cancels in `draft` or `open`, or the deadline passes with the pool unfilled. Refund every captured payment; state goes `cancelled` then `refunded` once all refunds complete.
   AC: refund retries are idempotent; partial failures stay visible and retryable.
-- [ ] **T-038 Pending entry expiry** [CORE]. needs T-032. Sweep expires pending entries older than 15 minutes and frees the slot.
+- [x] **T-038 Pending entry expiry** [CORE]. needs T-032. Sweep expires pending entries older than 15 minutes and frees the slot.
   AC: an expired entry that later captures is refunded, not seated.
 
 ## M4 — Screenshots and results
 
-- [ ] **T-040 Screenshot storage** [CORE]. needs T-005. Supabase Storage bucket, upload helper, size (5 MB) and type (png, jpeg, webp) limits, signed read URLs.
+- [x] **T-040 Screenshot storage** [CORE]. needs T-005. Supabase Storage bucket, upload helper, size (5 MB) and type (png, jpeg, webp) limits, signed read URLs.
   AC: oversize or wrong-type files rejected with a clear message.
-- [ ] **T-041 Submission endpoint** [CORE]. needs T-040, T-022. `POST /api/matches/:id/submissions` multipart; only the two players of an `awaiting_results` match; one submission per player; replace allowed until the match is evaluated.
+- [x] **T-041 Submission endpoint** [CORE]. needs T-040, T-022. `POST /api/matches/:id/submissions` multipart; only the two players of an `awaiting_results` match; one submission per player; replace allowed until the match is evaluated.
   AC: a non-participant gets 403; after evaluation, replacement is refused.
-- [ ] **T-042 Vision provider** [CORE]. needs T-003. `VisionProvider` interface, Anthropic implementation, zod-validated JSON (`05 §Vision schema`), up to 2 retries on malformed output, then `unreadable`.
+- [x] **T-042 Vision provider** [CORE]. needs T-003. `VisionProvider` interface, Anthropic implementation, zod-validated JSON (`05 §Vision schema`), up to 2 retries on malformed output, then `unreadable`.
   AC: malformed JSON, missing fields, and out-of-range confidence each produce `malformed` or `unreadable`, never a crash.
-- [ ] **T-043 Agreement rule** [CORE]. needs T-042. Pure function `evaluateSubmissions(match, subs, players)` returning `confirm`, `dispute(reason)`, or `wait`, per `05 §Agreement rule`.
+- [x] **T-043 Agreement rule** [CORE]. needs T-042. Pure function `evaluateSubmissions(match, subs, players)` returning `confirm`, `dispute(reason)`, or `wait`, per `05 §Agreement rule`.
   AC: table-driven tests for every row in the rule table.
-- [ ] **T-044 Dispute creation and summary** [CORE]. needs T-043. Open a dispute with structured facts and an LLM-written summary; fall back to a template if the model fails.
+- [x] **T-044 Dispute creation and summary** [CORE]. needs T-043. Open a dispute with structured facts and an LLM-written summary; fall back to a template if the model fails.
   AC: a dispute exists for every non-confirm outcome; summary never states amounts.
-- [ ] **T-045 Dispute resolution** [CORE]. needs T-044. `POST /api/disputes/:id/resolve` (host only): pick winner A or B plus a note; agent resumes on the next tick.
+- [x] **T-045 Dispute resolution** [CORE]. needs T-044. `POST /api/disputes/:id/resolve` (host only): pick winner A or B plus a note; agent resumes on the next tick.
   AC: only the tournament host can resolve; resolving twice is a no-op.
 
 ## M5 — The umpire (see `05`)
 
-- [ ] **T-050 Tool registry** [CORE]. needs T-030, T-043. Typed tools from `05 §Tools`; every call writes an audit row with `actor_type = 'agent'`.
+- [x] **T-050 Tool registry** [CORE]. needs T-030, T-043. Typed tools from `05 §Tools`; every call writes an audit row with `actor_type = 'agent'`.
   AC: the payout tool refuses without host approval.
-- [ ] **T-051 Tick function** [CORE]. needs T-050, T-022, T-044. `tick(tournamentId)` per `05 §Tick`: advisory lock, state-driven actions, every action re-checks state and uses a `dedupe_key`.
+- [x] **T-051 Tick function** [CORE]. needs T-050, T-022, T-044. `tick(tournamentId)` per `05 §Tick`: advisory lock, state-driven actions, every action re-checks state and uses a `dedupe_key`.
   AC: calling tick N times in a row equals calling it once.
-- [ ] **T-052 Triggers and sweep** [CORE]. needs T-051. Tick is invoked after: payment captured, submission saved, dispute resolved, host confirm. `POST /api/agent/sweep` (secret header) ticks every active tournament and handles timeouts.
+- [x] **T-052 Triggers and sweep** [CORE]. needs T-051. Tick is invoked after: payment captured, submission saved, dispute resolved, host confirm. `POST /api/agent/sweep` (secret header) ticks every active tournament and handles timeouts.
   AC: sweep with a wrong secret returns 401; no-show timeouts open disputes.
-- [ ] **T-053 Restart safety** [CORE]. needs T-051. Kill the process mid-tick; the next tick resumes without duplicate audit rows, double advances, or double payouts.
+- [x] **T-053 Restart safety** [CORE]. needs T-051. Kill the process mid-tick; the next tick resumes without duplicate audit rows, double advances, or double payouts.
   AC: automated test simulates a crash between steps (EC-restart).
-- [ ] **T-054 Final and payout draft** [CORE]. needs T-051, T-023. When the final is confirmed: set champion, create `payouts` rows (`drafted`), state to `confirmed`.
+- [x] **T-054 Final and payout draft** [CORE]. needs T-051, T-023. When the final is confirmed: set champion, create `payouts` rows (`drafted`), state to `confirmed`.
   AC: draft amounts equal `computePayouts` output; rows unique per place.
 
 ## M6 — Payout release
 
-- [ ] **T-060 Payout review screen data** [CORE]. needs T-054. `GET /api/tournaments/:id/payout`: recipients, amounts, pool, evidence summary, the audit trail of the bracket.
+- [x] **T-060 Payout review screen data** [CORE]. needs T-054. `GET /api/tournaments/:id/payout`: recipients, amounts, pool, evidence summary, the audit trail of the bracket.
   AC: numbers shown equal DB rows, not recomputed in the UI.
-- [ ] **T-061 Host confirm** [CORE]. needs T-060. `POST /api/tournaments/:id/payout/confirm`: compare-and-set `drafted` to `approved` inside a transaction; then send. Double-clicks and refreshes are harmless.
+- [x] **T-061 Host confirm** [CORE]. needs T-060. `POST /api/tournaments/:id/payout/confirm`: compare-and-set `drafted` to `approved` inside a transaction; then send. Double-clicks and refreshes are harmless.
   AC: second call returns the same result and sends nothing.
-- [ ] **T-062 Send payout batch** [CORE]. needs T-061. Create the PayPal batch with `sender_batch_id = payout-{tournamentId}`; store batch and item ids; state to `submitted`.
+- [x] **T-062 Send payout batch** [CORE]. needs T-061. Create the PayPal batch with `sender_batch_id = payout-{tournamentId}`; store batch and item ids; state to `submitted`.
   AC: retrying after a network error reuses the same batch id.
-- [ ] **T-063 Payout status tracking** [CORE]. needs T-062, T-034. Webhook and polling update each item (`succeeded`, `failed`, `unclaimed`); tournament goes `paid` only when all items succeed.
+- [x] **T-063 Payout status tracking** [CORE]. needs T-062, T-034. Webhook and polling update each item (`succeeded`, `failed`, `unclaimed`); tournament goes `paid` only when all items succeed.
   AC: one failed item leaves the tournament `confirmed` with a visible retry for that recipient.
-- [ ] **T-064 Ledger and receipt** [CORE]. needs T-063. Ledger lists every payment in and payout out with state; payout receipt view.
+- [x] **T-064 Ledger and receipt** [CORE]. needs T-063. Ledger lists every payment in and payout out with state; payout receipt view.
   AC: ledger total in minus total out equals zero after a successful payout.
 
 ## M7 — Plain-language setup
@@ -177,3 +177,34 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 - `T-012` — Built mobile-first `/login` and `/register` pages (`src/app/(public)/login/page.tsx`, `src/app/(public)/register/page.tsx`) with accessible role radio picker (`player` / `host`) and inline field error display.
 - `T-013` — Added `src/middleware.ts` protecting `/host/**` and `/play/**` and `src/app/wrong-role/page.tsx` with role-switch actions; verified cross-origin POST rejection and route protection in `tests/unit/auth.test.ts`.
 - `T-014` — Added `POST /api/auth/demo` (`src/app/api/auth/demo/route.ts`) gated by `DEMO_MODE=true` (returns 404 when false) and `DemoLoginButtons` ("Try as host", "Try as player") on the landing page.
+- `T-020` — Implemented tournament and match state machine (`src/server/tournament/state-machine.ts`) with table-driven unit tests covering every (from, to) pair (`EC-S1`).
+- `T-021` — Implemented deterministic Mulberry32 seeded 8-player single-elimination bracket generation (`src/server/tournament/bracket.ts`) producing 7 linked matches.
+- `T-022` — Implemented idempotent `advanceWinner(matchId)` in `src/server/tournament/bracket.ts`, activating next-round matches when both slots fill.
+- `T-023` — Implemented deterministic `computePayouts(poolCents, splitBps)` in `src/server/tournament/payout-math.ts` assigning remainder cents to the last place with property tests.
+- `T-024` — Implemented `src/server/tournament/service.ts` (`createTournament`, `updateTournamentTerms`, `openTournament`, `cancelTournamentByHost`) freezing `payout_split` and `entry_fee_cents` once state leaves `draft` (`EC-O6`).
+- `T-025` — Implemented shared Zod tournament configuration schema (`src/server/tournament/config.ts`) enforcing 8 slots, $1–$20 entry fee, and 100% (10000 bps) payout split.
+- `T-026` — Implemented `audit()` and `listTournamentActivity()` (`src/server/audit.ts`) with `dedupe_key` conflict-ignore idempotency and official UI sentence formatting.
+- `T-030` — Implemented `HttpPayPalClient` (`src/server/paypal/client.ts`) with OAuth token caching/expiry refresh, `PayPal-Request-Id` support, `PayPal-Debug-Id` error logging, and `FakePayPal` (`src/server/paypal/fake.ts`), plus `scripts/sandbox-check.ts` for `T-031` human sandbox verification.
+- `T-032` — Implemented `joinTournamentAndCreateOrder` (`src/server/paypal/orders.ts`) and `POST /api/tournaments/:id/join` with row-locked slot reservation (`pending + paid < 8`) and double-click idempotency (`EC-P2`).
+- `T-033` — Implemented `verifyAndCaptureEntryOrder`, `cancelEntryOrder`, `GET /api/paypal/return`, and `GET /api/paypal/cancel` with refresh safety (`EC-P3`), amount/reference verification (`EC-P10`), and slot release on cancel (`EC-P1`).
+- `T-034` — Implemented `handlePayPalWebhook` and `reprocessUnprocessedWebhookEvents` (`src/server/paypal/webhooks.ts`) and `POST /api/paypal/webhook` with raw-body signature verification (`EC-P9`), `webhook_events` deduplication, and out-of-order reconciliation (`EC-P4`).
+- `T-035` — Implemented `getLivePrizePoolCents` (`src/server/paypal/orders.ts`) summing only verified `captured` payments from the DB.
+- `T-036` — Implemented overflow protection inside `verifyAndCaptureEntryOrder` and `PAYMENT.CAPTURE.COMPLETED` webhook handler (`EC-P7`), automatically refunding captures that arrive after the 8th paid slot.
+- `T-037` — Implemented `issueRefundForPayment`, `refundTournamentPayments`, and `cancelAndRefundTournament` (`src/server/paypal/refunds.ts`) with idempotent `refund-<paymentId>` retries and `cancelled -> refunded` transition (`EC-P6`).
+- `T-038` — Implemented `expireStalePendingEntries` (15-min timeout) and automatic refund when an expired entry captures late (`EC-P8`).
+- `T-040` — Implemented `src/server/storage.ts` (`validateScreenshotUpload`, `SupabaseStorageProvider`, `MemoryStorageProvider`) enforcing 5 MB max size and PNG/JPEG/WebP mime types (`EC-R14`).
+- `T-041` — Implemented `submitMatchScreenshot` (`src/server/tournament/submissions.ts`) and `POST /api/matches/:id/submissions` restricting uploads to the two participants of an `awaiting_results` match and allowing replacement until evaluation (`EC-R13`).
+- `T-042` — Implemented `ExtractionSchema`, `parseVisionExtractionOutput`, `runVisionExtractionWithRetries`, `FakeVision`, and `AnthropicVisionProvider` (`src/server/agent/vision/`) with up to 2 retries on malformed output before marking `unreadable` (`EC-R6`, `EC-R7`).
+- `T-043` — Implemented `evaluateSubmissions` (`src/server/agent/evaluate.ts`) with table-driven unit tests for all 9 rows of `05 §Agreement rule` (`EC-R1` to `EC-R5`, `EC-R10`, `EC-R11`).
+- `T-044` — Implemented `generateDisputeSummary`, `sanitizeDisputeSummary`, `buildDisputeFallbackSummary` (`src/server/agent/summarize-dispute.ts`), and `openMatchDispute` (`src/server/tournament/disputes.ts`), guaranteeing summaries never mention dollar amounts.
+- `T-045` — Implemented `resolveDisputeByHost` (`src/server/tournament/disputes.ts`) and `POST /api/disputes/:id/resolve` with host ownership check (`EC-A1`) and idempotent double-resolution handling (`EC-R12`).
+- `T-050` — Implemented typed agent tool registry (`src/server/agent/tools.ts`) wrapping tournament, bracket, vision, evaluation, dispute, payout draft, and PayPal operations with Zod validation, `actor_type = 'agent'` audit logging, and host-approval enforcement on `paypal.createPayoutBatch`.
+- `T-051` — Implemented idempotent `tick(tournamentId)` (`src/server/agent/tick.ts`) with `pg_advisory_xact_lock`, external vision extraction outside DB locks, state-driven transitions, and `dedupe_key` audit logging (`EC-R9`).
+- `T-052` — Implemented `sweepActiveTournaments()`, `POST /api/agent/sweep`, and `POST /api/agent/tick/:id` protected by `x-sweep-secret`, triggering `tick()` after captures, submissions, dispute resolutions, and payout confirmations (`EC-A5`, `EC-R5`).
+- `T-053` — Added `onStepHook` crash-injection support in `tick()` and automated mid-tick restart safety tests (`EC-R8`) verifying zero duplicate advances, audit rows, or payouts.
+- `T-054` — Implemented `draftTournamentPayouts` (`src/server/paypal/payouts.ts`) computing deterministic payouts via `computePayouts`, validating recipient PayPal emails, inserting unique `drafted` payout rows, and transitioning the tournament to `confirmed`.
+- `T-060` — Implemented `getTournamentPayoutReviewData` and `GET /api/tournaments/:id/payout` returning DB-backed payout rows, live pool, final match evidence summary, and bracket audit trail.
+- `T-061` — Implemented `approveAndSendTournamentPayouts` and `POST /api/tournaments/:id/payout/confirm` using compare-and-set (`drafted -> approved`) for double-click/refresh idempotency (`EC-O1`).
+- `T-062` — Implemented `sendPayoutBatch` (`src/server/paypal/payouts.ts`) sending `sender_batch_id = payout-{tournamentId}` (or `-retry-{n}` for single-item retries) and storing batch/item IDs (`EC-O2`, `EC-O4`).
+- `T-063` — Implemented `syncTournamentPayoutStatuses`, webhook payout item updates, and `retryFailedPayoutItem` transitioning the tournament to `paid` only when every item succeeds (`EC-O3`, `EC-O5`).
+- `T-064` — Implemented `getTournamentLedger` (`src/server/paypal/payouts.ts`) listing all entry payments in and payout items out and verifying `netBalanceCents === 0` once paid.

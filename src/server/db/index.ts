@@ -1,16 +1,15 @@
 import fs from "fs";
 import path from "path";
 import postgres from "postgres";
-import { drizzle as drizzlePostgres, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import { drizzle as drizzlePglite, type PgliteDatabase } from "drizzle-orm/pglite";
+import { drizzle as drizzlePostgres } from "drizzle-orm/postgres-js";
+import { drizzle as drizzlePglite } from "drizzle-orm/pglite";
+import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { PGlite } from "@electric-sql/pglite";
 import { sql } from "drizzle-orm";
 import { env } from "@/server/env";
 import * as schema from "./schema";
 
-export type AppDatabase =
-  | PostgresJsDatabase<typeof schema>
-  | PgliteDatabase<typeof schema>;
+export type AppDatabase = PgDatabase<PgQueryResultHKT, typeof schema>;
 
 export type DbTransaction = Parameters<
   Parameters<AppDatabase["transaction"]>[0]
@@ -31,14 +30,14 @@ function createDatabaseFromEnv(): AppDatabase {
       target === "memory" || target === ""
         ? new PGlite()
         : new PGlite(target);
-    return drizzlePglite(activePglite, { schema });
+    return drizzlePglite(activePglite, { schema }) as unknown as AppDatabase;
   }
 
   activePgClient = postgres(url, {
     max: 10,
     prepare: false,
   });
-  return drizzlePostgres(activePgClient, { schema });
+  return drizzlePostgres(activePgClient, { schema }) as unknown as AppDatabase;
 }
 
 export function getDb(): AppDatabase {
@@ -108,7 +107,7 @@ export async function runMigrations(targetDb: AppDatabase = getDb()): Promise<vo
 export async function resetTestDatabase(): Promise<AppDatabase> {
   if (!activePglite || !activeDb) {
     activePglite = new PGlite();
-    activeDb = drizzlePglite(activePglite, { schema });
+    activeDb = drizzlePglite(activePglite, { schema }) as unknown as AppDatabase;
     isTestDbMigrated = false;
   }
   if (!isTestDbMigrated) {

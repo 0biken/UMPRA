@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { hashPassword, verifyPassword } from "@/server/auth/password";
 import {
   getSessionFromToken,
@@ -14,7 +14,6 @@ import {
 } from "@/server/auth/service";
 import { evaluateRouteAccess } from "@/middleware";
 import {
-  closeDatabase,
   resetTestDatabase,
   users,
   type AppDatabase,
@@ -27,10 +26,6 @@ describe("auth core, routes, protection, and demo login (T-010 to T-014)", () =>
   beforeEach(async () => {
     db = await resetTestDatabase();
     resetLoginRateLimits();
-  });
-
-  afterAll(async () => {
-    await closeDatabase();
   });
 
   it("hashes and verifies passwords with bcrypt", async () => {
