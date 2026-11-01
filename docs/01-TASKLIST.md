@@ -16,14 +16,14 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
   AC: app refuses to boot with a missing required var; `.env.example` committed.
 - [x] **T-004 Design tokens and fonts** [CORE]. needs T-002. Implement `07 §Tokens` in `globals.css`, load fonts with `next/font`, build a `/styleguide` dev page that renders tokens and every component state as they are added.
   AC: tokens match the doc exactly; `/styleguide` renders at 360px without horizontal scroll.
-- [ ] **T-005 Database and migrations** [CORE]. needs T-003. Supabase project, Drizzle config, schema from `02 §Schema`, first migration, `db:migrate`.
+- [x] **T-005 Database and migrations** [CORE]. needs T-003. Supabase project, Drizzle config, schema from `02 §Schema`, first migration, `db:migrate`.
   AC: all tables, constraints, and indexes from the doc exist; migration runs from empty.
 - [x] **T-006 Shared libs** [CORE]. needs T-002. `lib/money.ts` (cents helpers, PayPal decimal-string conversion), `lib/errors.ts` (`AppError`), `lib/ids.ts`.
   AC: unit tests cover cents to `"28.00"` and back, rounding, negative rejection.
 
 ## M1 — Authentication (see `03`)
 
-- [ ] **T-010 Auth core** [CORE]. needs T-005, T-006. bcrypt hashing, JWT session cookie via jose, `getSession()`, `requireUser(role?)`.
+- [x] **T-010 Auth core** [CORE]. needs T-005, T-006. bcrypt hashing, JWT session cookie via jose, `getSession()`, `requireUser(role?)`.
   AC: tampered or expired cookie is rejected; unit tests for sign/verify.
 - [ ] **T-011 Register, login, logout, me routes** [CORE]. needs T-010. Zod-validated; generic error on bad credentials; basic login rate limit.
   AC: duplicate email returns a clear error; passwords never returned or logged.
@@ -171,3 +171,5 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 - `T-003` — Implemented `src/server/env.ts` with Zod fail-fast validation (enforcing `PAYPAL_ENV=sandbox` and 32+ char `SESSION_SECRET`), Next.js `src/instrumentation.ts` boot check, and unit tests in `tests/unit/env.test.ts`.
 - `T-006` — Implemented `src/lib/money.ts` (integer cents validation, `toPayPalAmount`, `fromPayPalAmount`, `dollarsToCents`, `formatUsd`), `src/lib/errors.ts` (`AppError` and `toErrorResponse`), and `src/lib/ids.ts` (UUID and deterministic PayPal request/batch ID helpers) with unit tests in `tests/unit/money.test.ts`.
 - `T-004` — Implemented exact `@theme` design tokens and typography scale from `07-DESIGN-SYSTEM.md` in `src/app/globals.css`, loaded `Bricolage_Grotesque` and `Public_Sans` in `src/app/layout.tsx`, created core themed UI components (`Button`, `Input`, `Textarea`, `SelectField`, `Panel`, `Banner`, `EmptyState`, `Skeleton`, `Stepper`, `Dialog`, `StatePill`, `PrizePlate`), and built `/styleguide` plus `tests/unit/tokens.test.ts`.
+- `T-005` — Created Drizzle ORM schema (`src/server/db/schema.ts`), initial SQL migration (`src/server/db/migrations/0000_initial.sql`), `drizzle.config.ts`, `scripts/migrate.ts`, and `src/server/db/index.ts` (using `postgres.js` for Supabase/Postgres URLs and `@electric-sql/pglite` devDependency for fast embedded Postgres 16 test runs); verified all 10 tables, CHECK constraints, and partial unique indexes in `tests/unit/db.test.ts`.
+- `T-010` — Implemented bcrypt password hashing (`src/server/auth/password.ts`), HS256 JWT session cookies via `jose` (`src/server/auth/session.ts`), and `requireUser` / `requireTournamentHost` / `assertSameOrigin` guards (`src/server/auth/guards.ts`) with unit tests in `tests/unit/auth.test.ts`.
