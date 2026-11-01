@@ -25,13 +25,13 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
 
 - [x] **T-010 Auth core** [CORE]. needs T-005, T-006. bcrypt hashing, JWT session cookie via jose, `getSession()`, `requireUser(role?)`.
   AC: tampered or expired cookie is rejected; unit tests for sign/verify.
-- [ ] **T-011 Register, login, logout, me routes** [CORE]. needs T-010. Zod-validated; generic error on bad credentials; basic login rate limit.
+- [x] **T-011 Register, login, logout, me routes** [CORE]. needs T-010. Zod-validated; generic error on bad credentials; basic login rate limit.
   AC: duplicate email returns a clear error; passwords never returned or logged.
-- [ ] **T-012 Auth pages** [CORE]. needs T-011, T-004. Login and register pages per `06 §Screens`, role picker (host or player).
+- [x] **T-012 Auth pages** [CORE]. needs T-011, T-004. Login and register pages per `06 §Screens`, role picker (host or player).
   AC: works at 360px; keyboard accessible; errors shown inline.
-- [ ] **T-013 Route protection and origin check** [CORE]. needs T-010. Middleware for `/host/**` and `/play/**`; Origin/Content-Type check helper for mutating routes.
+- [x] **T-013 Route protection and origin check** [CORE]. needs T-010. Middleware for `/host/**` and `/play/**`; Origin/Content-Type check helper for mutating routes.
   AC: wrong-role access redirects with a clear message; cross-origin POST rejected.
-- [ ] **T-014 Demo login** [CORE]. needs T-011. `POST /api/auth/demo` available only when `DEMO_MODE=true`; "Try as host" and "Try as player" buttons on the landing page.
+- [x] **T-014 Demo login** [CORE]. needs T-011. `POST /api/auth/demo` available only when `DEMO_MODE=true`; "Try as host" and "Try as player" buttons on the landing page.
   AC: with `DEMO_MODE=false` the route returns 404.
 
 ## M2 — Tournament domain
@@ -173,3 +173,7 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 - `T-004` — Implemented exact `@theme` design tokens and typography scale from `07-DESIGN-SYSTEM.md` in `src/app/globals.css`, loaded `Bricolage_Grotesque` and `Public_Sans` in `src/app/layout.tsx`, created core themed UI components (`Button`, `Input`, `Textarea`, `SelectField`, `Panel`, `Banner`, `EmptyState`, `Skeleton`, `Stepper`, `Dialog`, `StatePill`, `PrizePlate`), and built `/styleguide` plus `tests/unit/tokens.test.ts`.
 - `T-005` — Created Drizzle ORM schema (`src/server/db/schema.ts`), initial SQL migration (`src/server/db/migrations/0000_initial.sql`), `drizzle.config.ts`, `scripts/migrate.ts`, and `src/server/db/index.ts` (using `postgres.js` for Supabase/Postgres URLs and `@electric-sql/pglite` devDependency for fast embedded Postgres 16 test runs); verified all 10 tables, CHECK constraints, and partial unique indexes in `tests/unit/db.test.ts`.
 - `T-010` — Implemented bcrypt password hashing (`src/server/auth/password.ts`), HS256 JWT session cookies via `jose` (`src/server/auth/session.ts`), and `requireUser` / `requireTournamentHost` / `assertSameOrigin` guards (`src/server/auth/guards.ts`) with unit tests in `tests/unit/auth.test.ts`.
+- `T-011` — Implemented `register`, `login`, `logout`, and `me` API routes and `src/server/auth/service.ts` with Zod validation, identical `INVALID_CREDENTIALS` messages for unknown email vs bad password, and 10-attempts/15-min IP+email login rate limiting.
+- `T-012` — Built mobile-first `/login` and `/register` pages (`src/app/(public)/login/page.tsx`, `src/app/(public)/register/page.tsx`) with accessible role radio picker (`player` / `host`) and inline field error display.
+- `T-013` — Added `src/middleware.ts` protecting `/host/**` and `/play/**` and `src/app/wrong-role/page.tsx` with role-switch actions; verified cross-origin POST rejection and route protection in `tests/unit/auth.test.ts`.
+- `T-014` — Added `POST /api/auth/demo` (`src/app/api/auth/demo/route.ts`) gated by `DEMO_MODE=true` (returns 404 when false) and `DemoLoginButtons` ("Try as host", "Try as player") on the landing page.
