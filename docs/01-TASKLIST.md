@@ -10,7 +10,7 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
 
 - [x] **T-001 Repo and licence** [CORE]. Public repo, `LICENSE` (MIT) visible at root, `.gitignore`, `README.md` stub, copy this docs pack into the repo (`AGENTS.md` at root, rest in `docs/`).
   AC: repo builds nothing yet; MIT file present; no secrets.
-- [ ] **T-002 Scaffold app** [CORE]. needs T-001. Next.js App Router + TS strict + Tailwind + shadcn/ui + Vitest + ESLint. Add all scripts listed in `AGENTS.md`.
+- [x] **T-002 Scaffold app** [CORE]. needs T-001. Next.js App Router + TS strict + Tailwind + shadcn/ui + Vitest + ESLint. Add all scripts listed in `AGENTS.md`.
   AC: `npm run dev/build/lint/typecheck/test` all pass on a blank page.
 - [ ] **T-003 Env handling** [CORE]. needs T-002. `src/server/env.ts` validates env with zod and fails fast; `.env.example` lists every var in `02 §Env vars`.
   AC: app refuses to boot with a missing required var; `.env.example` committed.
@@ -167,3 +167,4 @@ Build against `06` and `07`. Each task includes empty, loading, and error states
 _(Append one line per completed task: `T-xxx — what changed, anything surprising`.)_
 
 - `T-001` — Initialized git repository, added MIT `LICENSE`, `.gitignore`, `README.md` stub, `.env.example`, and organized docs into `docs/` with `AGENTS.md` at root.
+- `T-002` — Scaffolded Next.js 15 App Router with TypeScript strict, Tailwind v4, shadcn/ui config, Vitest, ESLint, and all required npm scripts; set `outputFileTracingRoot` in `next.config.ts` to avoid parent lockfile warnings.
