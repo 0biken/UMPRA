@@ -1,9 +1,23 @@
 import type { Metadata } from "next";
+import { Bricolage_Grotesque, Public_Sans } from "next/font/google";
 import "./globals.css";
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage",
+  display: "swap",
+});
+
+const publicSans = Public_Sans({
+  subsets: ["latin"],
+  variable: "--font-public-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Umpra — Autonomous Tournament Umpire",
-  description: "Grassroots gaming tournaments umpired by AI and paid out via PayPal.",
+  description:
+    "Set up an 8-player tournament, verify match screenshots with AI, and release the prize pool via PayPal.",
 };
 
 export default function RootLayout({
@@ -12,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={`${bricolage.variable} ${publicSans.variable}`}>
+      <body className="min-h-screen bg-chalk text-ink antialiased">{children}</body>
     </html>
   );
 }

@@ -14,11 +14,11 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
   AC: `npm run dev/build/lint/typecheck/test` all pass on a blank page.
 - [x] **T-003 Env handling** [CORE]. needs T-002. `src/server/env.ts` validates env with zod and fails fast; `.env.example` lists every var in `02 §Env vars`.
   AC: app refuses to boot with a missing required var; `.env.example` committed.
-- [ ] **T-004 Design tokens and fonts** [CORE]. needs T-002. Implement `07 §Tokens` in `globals.css`, load fonts with `next/font`, build a `/styleguide` dev page that renders tokens and every component state as they are added.
+- [x] **T-004 Design tokens and fonts** [CORE]. needs T-002. Implement `07 §Tokens` in `globals.css`, load fonts with `next/font`, build a `/styleguide` dev page that renders tokens and every component state as they are added.
   AC: tokens match the doc exactly; `/styleguide` renders at 360px without horizontal scroll.
 - [ ] **T-005 Database and migrations** [CORE]. needs T-003. Supabase project, Drizzle config, schema from `02 §Schema`, first migration, `db:migrate`.
   AC: all tables, constraints, and indexes from the doc exist; migration runs from empty.
-- [ ] **T-006 Shared libs** [CORE]. needs T-002. `lib/money.ts` (cents helpers, PayPal decimal-string conversion), `lib/errors.ts` (`AppError`), `lib/ids.ts`.
+- [x] **T-006 Shared libs** [CORE]. needs T-002. `lib/money.ts` (cents helpers, PayPal decimal-string conversion), `lib/errors.ts` (`AppError`), `lib/ids.ts`.
   AC: unit tests cover cents to `"28.00"` and back, rounding, negative rejection.
 
 ## M1 — Authentication (see `03`)
@@ -169,3 +169,5 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 - `T-001` — Initialized git repository, added MIT `LICENSE`, `.gitignore`, `README.md` stub, `.env.example`, and organized docs into `docs/` with `AGENTS.md` at root.
 - `T-002` — Scaffolded Next.js 15 App Router with TypeScript strict, Tailwind v4, shadcn/ui config, Vitest, ESLint, and all required npm scripts; set `outputFileTracingRoot` in `next.config.ts` to avoid parent lockfile warnings.
 - `T-003` — Implemented `src/server/env.ts` with Zod fail-fast validation (enforcing `PAYPAL_ENV=sandbox` and 32+ char `SESSION_SECRET`), Next.js `src/instrumentation.ts` boot check, and unit tests in `tests/unit/env.test.ts`.
+- `T-006` — Implemented `src/lib/money.ts` (integer cents validation, `toPayPalAmount`, `fromPayPalAmount`, `dollarsToCents`, `formatUsd`), `src/lib/errors.ts` (`AppError` and `toErrorResponse`), and `src/lib/ids.ts` (UUID and deterministic PayPal request/batch ID helpers) with unit tests in `tests/unit/money.test.ts`.
+- `T-004` — Implemented exact `@theme` design tokens and typography scale from `07-DESIGN-SYSTEM.md` in `src/app/globals.css`, loaded `Bricolage_Grotesque` and `Public_Sans` in `src/app/layout.tsx`, created core themed UI components (`Button`, `Input`, `Textarea`, `SelectField`, `Panel`, `Banner`, `EmptyState`, `Skeleton`, `Stepper`, `Dialog`, `StatePill`, `PrizePlate`), and built `/styleguide` plus `tests/unit/tokens.test.ts`.
