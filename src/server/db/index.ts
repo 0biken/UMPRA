@@ -1,3 +1,4 @@
+import { testOverrides } from "@/server/test-overrides";
 import fs from "fs";
 import path from "path";
 import postgres from "postgres";
@@ -41,6 +42,8 @@ function createDatabaseFromEnv(): AppDatabase {
 }
 
 export function getDb(): AppDatabase {
+  const override = testOverrides()?.db;
+  if (override) return override;
   if (!activeDb) {
     activeDb = createDatabaseFromEnv();
   }

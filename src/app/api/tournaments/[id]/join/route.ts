@@ -1,3 +1,4 @@
+import { readJson } from "@/server/input";
 import { NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/errors";
 import { assertSameOrigin, requireUser } from "@/server/auth/guards";
@@ -11,7 +12,7 @@ export async function POST(
     assertSameOrigin(req);
     const user = await requireUser("player");
     const { id: tournamentId } = await context.params;
-    const body = (await req.json()) as {
+    const body = (await readJson(req)) as {
       gamertag?: string;
       paypalEmail?: string;
     };

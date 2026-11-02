@@ -22,7 +22,7 @@ export const registerSchema = z.object({
     .min(2, "Display name must be at least 2 characters.")
     .max(40, "Display name must be at most 40 characters."),
   role: z.enum(["host", "player"], {
-    errorMap: () => ({ message: "Choose either host or player." }),
+    error: "Choose either host or player.",
   }),
 });
 
@@ -37,7 +37,7 @@ export const loginSchema = z.object({
 
 export const demoLoginSchema = z.object({
   role: z.enum(["host", "player"], {
-    errorMap: () => ({ message: "Choose either host or player." }),
+    error: "Choose either host or player.",
   }),
 });
 
@@ -193,7 +193,7 @@ export async function loginDemoUser(
     role === "host" ? "demo-host@umpra.test" : "demo-player-1@umpra.test";
   const displayName = role === "host" ? "Tunde (Demo Host)" : "Kemi (Demo Player)";
   const paypalEmail =
-    role === "player" ? "sb-player1@personal.example.com" : null;
+    role === "player" ? env.DEMO_PAYPAL_RECIPIENTS[0] ?? null : null;
 
   let [userRow] = await db
     .select()

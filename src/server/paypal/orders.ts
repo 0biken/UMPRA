@@ -17,12 +17,12 @@ import { issueRefundForPayment } from "./refunds";
 
 export const joinTournamentSchema = z.object({
   gamertag: z
-    .string({ required_error: "Enter your in-game gamertag." })
+    .string({ error: "Enter your in-game gamertag." })
     .trim()
     .min(2, "Gamertag must be at least 2 characters.")
     .max(24, "Gamertag must be at most 24 characters."),
   paypalEmail: z
-    .string({ required_error: "Enter your PayPal sandbox personal email." })
+    .string({ error: "Enter your PayPal sandbox personal email." })
     .trim()
     .toLowerCase()
     .email("Enter a valid PayPal sandbox email address."),

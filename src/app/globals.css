@@ -46,6 +46,15 @@ html { background: var(--color-chalk); color: var(--color-ink); font-family: var
 :focus-visible { outline: 3px solid var(--color-pitch); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
+@keyframes umpra-bracket-draw {
+  from { stroke-dashoffset: var(--path-length); }
+  to { stroke-dashoffset: 0; }
+}
+
+.umpra-bracket-winner-line {
+  animation: umpra-bracket-draw var(--dur-draw) var(--ease-out) both;
+}
+
 /* Typography scale utilities per 07 §Type scale */
 .type-display {
   font-family: var(--font-display);

@@ -86,7 +86,7 @@ export const users = pgTable(
   (table) => [
     check("users_role_check", sql`${table.role} in ('host', 'player')`),
   ]
-);
+).enableRLS();
 
 export const tournaments = pgTable(
   "tournaments",
@@ -122,7 +122,7 @@ export const tournaments = pgTable(
     ),
     check("tournaments_currency_check", sql`${table.currency} = 'USD'`),
   ]
-);
+).enableRLS();
 
 export const entries = pgTable(
   "entries",
@@ -162,7 +162,7 @@ export const entries = pgTable(
       sql`${table.status} in ('pending', 'paid', 'cancelled', 'expired', 'refunded')`
     ),
   ]
-);
+).enableRLS();
 
 export const payments = pgTable(
   "payments",
@@ -198,7 +198,7 @@ export const payments = pgTable(
       sql`${table.status} in ('created', 'approved', 'captured', 'failed', 'refund_pending', 'refunded')`
     ),
   ]
-);
+).enableRLS();
 
 export const matches = pgTable(
   "matches",
@@ -242,7 +242,7 @@ export const matches = pgTable(
       sql`${table.nextSlot} is null or ${table.nextSlot} in ('a', 'b')`
     ),
   ]
-);
+).enableRLS();
 
 export const submissions = pgTable(
   "submissions",
@@ -276,7 +276,7 @@ export const submissions = pgTable(
       sql`${table.extractionStatus} in ('pending', 'ok', 'malformed', 'unreadable')`
     ),
   ]
-);
+).enableRLS();
 
 export const disputes = pgTable(
   "disputes",
@@ -312,7 +312,7 @@ export const disputes = pgTable(
       sql`${table.resolution} is null or ${table.resolution} in ('winner_a', 'winner_b')`
     ),
   ]
-);
+).enableRLS();
 
 export const payouts = pgTable(
   "payouts",
@@ -352,7 +352,7 @@ export const payouts = pgTable(
       sql`${table.status} in ('drafted', 'approved', 'submitted', 'succeeded', 'failed', 'unclaimed')`
     ),
   ]
-);
+).enableRLS();
 
 export const auditLog = pgTable(
   "audit_log",
@@ -384,7 +384,7 @@ export const auditLog = pgTable(
       sql`${table.actorType} in ('agent', 'user', 'system', 'paypal')`
     ),
   ]
-);
+).enableRLS();
 
 export const webhookEvents = pgTable("webhook_events", {
   id: text("id").primaryKey(),
@@ -395,4 +395,4 @@ export const webhookEvents = pgTable("webhook_events", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+}).enableRLS();

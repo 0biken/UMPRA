@@ -16,19 +16,8 @@ export interface AuditInput {
   dedupeKey?: string | null;
 }
 
-export const DISPUTE_REASON_LABELS: Record<string, string> = {
-  no_submissions: "No results submitted",
-  missing_opponent_submission: "Only one player submitted",
-  unreadable_evidence: "Screenshot could not be read",
-  low_confidence: "Screenshot unclear",
-  player_mismatch: "Names on screenshot don't match",
-  no_decisive_result: "No clear winner",
-  conflicting_results: "Screenshots disagree",
-};
-
-export function getDisputeReasonLabel(reason: string): string {
-  return DISPUTE_REASON_LABELS[reason] ?? reason;
-}
+import { getDisputeReasonLabel } from "@/lib/dispute-reasons";
+export { getDisputeReasonLabel } from "@/lib/dispute-reasons";
 
 /**
  * Formats an audit log row into the official UI sentence specified in 05 §Audit log.
@@ -64,6 +53,8 @@ export function formatAuditSentence(
         : "Tournament cancelled.";
     case "tournament.refunded":
       return "All entry fees have been refunded.";
+    case "entry.simulated":
+      return `${str("gamertag", "Player")} joined as a simulated demo player; no funds collected.`;
     case "entry.paid": {
       const feeStr =
         typeof payload.amountCents === "number"
@@ -74,7 +65,7 @@ export function formatAuditSentence(
     case "entry.expired":
       return `${str("gamertag", "Player")}'s checkout expired and the slot reopened.`;
     case "tournament.locked":
-      return "All 8 players paid. Registration is closed.";
+      return "All 8 slots are filled. Registration is closed.";
     case "bracket.generated":
       return "Umpra drew the bracket.";
     case "match.opened":

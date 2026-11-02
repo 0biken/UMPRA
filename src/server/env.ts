@@ -17,9 +17,7 @@ export const envSchema = z.object({
     .min(32, "SESSION_SECRET must be at least 32 characters"),
 
   PAYPAL_ENV: z.literal("sandbox", {
-    errorMap: () => ({
-      message: "PAYPAL_ENV must be 'sandbox' (production is forbidden)",
-    }),
+    error: "PAYPAL_ENV must be 'sandbox' (production is forbidden)",
   }),
   PAYPAL_CLIENT_ID: z.string().min(1, "PAYPAL_CLIENT_ID is required"),
   PAYPAL_CLIENT_SECRET: z.string().min(1, "PAYPAL_CLIENT_SECRET is required"),
@@ -40,6 +38,9 @@ export const envSchema = z.object({
 
   AGENT_SWEEP_SECRET: z.string().min(1, "AGENT_SWEEP_SECRET is required"),
   DEMO_MODE: booleanString(false),
+  DEMO_PAYPAL_RECIPIENTS: z.string().optional().default("").transform(s => s.split(",").map(v => v.trim()).filter(Boolean)).pipe(z.array(z.string().email())),
+  DEMO_BUYER_EMAIL: z.union([z.string().email(), z.literal("")]).optional().default(""),
+  DEMO_BUYER_PASSWORD: z.string().optional().default(""),
   MATCH_TIMEOUT_MIN: z.coerce
     .number()
     .int()

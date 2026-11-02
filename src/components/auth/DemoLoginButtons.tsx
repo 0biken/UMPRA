@@ -4,10 +4,12 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
-import type { UserRole } from "@/server/db/schema";
+import type { UserRole } from "@/lib/tournament-view";
 
 export function DemoLoginButtons() {
   const router = useRouter();
+  const [ready, setReady] = React.useState(false);
+  React.useEffect(() => setReady(true), []);
   const [loadingRole, setLoadingRole] = React.useState<UserRole | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -41,7 +43,7 @@ export function DemoLoginButtons() {
         <Button
           variant="primary"
           loading={loadingRole === "host"}
-          disabled={loadingRole !== null && loadingRole !== "host"}
+          disabled={!ready || loadingRole !== null}
           onClick={() => handleDemoLogin("host")}
         >
           Try as host
@@ -49,7 +51,7 @@ export function DemoLoginButtons() {
         <Button
           variant="secondary"
           loading={loadingRole === "player"}
-          disabled={loadingRole !== null && loadingRole !== "player"}
+          disabled={!ready || loadingRole !== null}
           onClick={() => handleDemoLogin("player")}
         >
           Try as player

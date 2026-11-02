@@ -1,3 +1,4 @@
+import { testOverrides } from "@/server/test-overrides";
 import Anthropic from "@anthropic-ai/sdk";
 import { env } from "@/server/env";
 import {
@@ -56,6 +57,8 @@ export class AnthropicVisionProvider implements VisionProvider {
 let activeVisionProvider: VisionProvider | null = null;
 
 export function getVisionProvider(): VisionProvider {
+  const override = testOverrides()?.vision;
+  if (override) return override;
   if (!activeVisionProvider) {
     activeVisionProvider = new AnthropicVisionProvider();
   }

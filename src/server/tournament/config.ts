@@ -60,40 +60,35 @@ const payoutSplitBpsSchema = z
 export const tournamentConfigSchema = z
   .object({
     title: z
-      .string({ required_error: "Enter a tournament title." })
+      .string({ error: "Enter a tournament title." })
       .trim()
       .min(3, "Title must be at least 3 characters.")
       .max(80, "Title must be at most 80 characters."),
     game: z
-      .string({ required_error: "Enter the game name." })
+      .string({ error: "Enter the game name." })
       .trim()
       .min(2, "Game name must be at least 2 characters.")
       .max(60, "Game name must be at most 60 characters."),
     format: z
       .literal("single_elimination", {
-        errorMap: () => ({
-          message: "Only single elimination format is supported.",
-        }),
+        error: "Only single elimination format is supported.",
       })
       .default("single_elimination"),
     slots: z
       .literal(8, {
-        errorMap: () => ({
-          message: "Only 8-player tournaments are supported.",
-        }),
+        error: "Only 8-player tournaments are supported.",
       })
       .default(8),
     entryFeeCents: z
       .number({
-        required_error: "Enter an entry fee between $1 and $20.",
-        invalid_type_error: "Entry fee must be a number.",
+        error: "Enter an entry fee between $1 and $20.",
       })
       .int("Entry fee in cents must be a whole number.")
       .min(100, "Entry fee must be at least $1.00.")
       .max(2000, "Entry fee cannot exceed $20.00."),
     currency: z
       .literal("USD", {
-        errorMap: () => ({ message: "Only USD is supported in sandbox mode." }),
+        error: "Only USD is supported in sandbox mode.",
       })
       .default("USD"),
     payoutSplit: payoutSplitBpsSchema,

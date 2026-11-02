@@ -1,3 +1,4 @@
+import { testOverrides } from "@/server/test-overrides";
 import { createClient } from "@supabase/supabase-js";
 import { AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
@@ -117,12 +118,7 @@ export class MemoryStorageProvider implements StorageProvider {
   }> {
     const found = this.files.get(path);
     if (!found) {
-      // Return a 1x1 transparent PNG fallback if a seeded demo path is requested
-      const fallbackPng = Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-        "base64"
-      );
-      return { bytes: new Uint8Array(fallbackPng), mimeType: "image/png" };
+      throw new AppError("NOT_FOUND", "Screenshot not found.", 404);
     }
     return {
       bytes: new Uint8Array(found.bytes),
@@ -133,7 +129,7 @@ export class MemoryStorageProvider implements StorageProvider {
   public async getSignedReadUrl(path: string): Promise<string> {
     const found = this.files.get(path);
     if (!found) {
-      return `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==`;
+      throw new AppError("NOT_FOUND", "Screenshot not found.", 404);
     }
     const b64 = Buffer.from(found.bytes).toString("base64");
     return `data:${found.mimeType};base64,${b64}`;
@@ -141,15 +137,6 @@ export class MemoryStorageProvider implements StorageProvider {
 }
 
 export class SupabaseStorageProvider implements StorageProvider {
-  private readonly fallback = new MemoryStorageProvider();
-
-  private isPlaceholderSupabase(): boolean {
-    return (
-      env.SUPABASE_URL.includes("example.supabase.co") ||
-      env.SUPABASE_SERVICE_ROLE_KEY === "test-supabase-service-role-key"
-    );
-  }
-
   private getClient() {
     return createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
@@ -166,10 +153,6 @@ export class SupabaseStorageProvider implements StorageProvider {
       byteLength: params.bytes.byteLength,
       mimeType: params.mimeType,
     });
-
-    if (this.isPlaceholderSupabase()) {
-      return this.fallback.uploadScreenshot(params);
-    }
 
     const ext = EXT_BY_MIME[validMime];
     const objectPath = `matches/${params.matchId}/${params.playerId}-${newId()}.${ext}`;
@@ -197,10 +180,6 @@ export class SupabaseStorageProvider implements StorageProvider {
     bytes: Uint8Array;
     mimeType: AllowedScreenshotMime;
   }> {
-    if (this.isPlaceholderSupabase()) {
-      return this.fallback.downloadScreenshot(path);
-    }
-
     const supabase = this.getClient();
     const { data, error } = await supabase.storage
       .from(env.SUPABASE_BUCKET)
@@ -231,17 +210,13 @@ export class SupabaseStorageProvider implements StorageProvider {
     path: string,
     expiresInSeconds = 3600
   ): Promise<string> {
-    if (this.isPlaceholderSupabase()) {
-      return this.fallback.getSignedReadUrl(path);
-    }
-
     const supabase = this.getClient();
     const { data, error } = await supabase.storage
       .from(env.SUPABASE_BUCKET)
       .createSignedUrl(path, expiresInSeconds);
 
     if (error || !data?.signedUrl) {
-      return this.fallback.getSignedReadUrl(path);
+      throw new AppError("NOT_FOUND", "Screenshot is unavailable. Try again later.", 404);
     }
 
     return data.signedUrl;
@@ -251,6 +226,8 @@ export class SupabaseStorageProvider implements StorageProvider {
 let activeStorageProvider: StorageProvider | null = null;
 
 export function getStorageProvider(): StorageProvider {
+  const override = testOverrides()?.storage;
+  if (override) return override;
   if (!activeStorageProvider) {
     activeStorageProvider = new SupabaseStorageProvider();
   }

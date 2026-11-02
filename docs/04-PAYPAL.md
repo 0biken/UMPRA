@@ -135,7 +135,9 @@ Out-of-order rule: handlers look up by PayPal ids stored on our rows. If the row
 
 The agent never calls `fetch` against PayPal. It calls registry tools (`05 §Tools`) that wrap this service: `paypal.getOrder`, `paypal.captureOrder`, `paypal.refundCapture`, `paypal.createPayoutBatch`, `paypal.getPayoutBatch`. Task T-070 evaluates `@paypal/agent-toolkit` (TypeScript, sandbox mode via `context: { sandbox: true }`, Node 18+) as the implementation behind the order and capture tools, which supports the "Best Use of PayPal + AI" and "Agentic Commerce" angles. Record the outcome here:
 
-> Decision (fill in at T-070): _pending_
+**Decision (T-070, source review November 1, 2026):** retain the typed direct REST client behind the audited tool registry. No toolkit dependency is added.
+
+The current [official TypeScript README](https://github.com/paypal/agent-toolkit/blob/main/typescript/README.md) supports sandbox configuration and lists create/get/pay-order and refund tools. This corrects the earlier note claiming there was no refund coverage. The [order and capture parameter schemas](https://github.com/paypal/agent-toolkit/blob/main/typescript/src/shared/parameters.ts) do not expose Umpra's per-call deterministic request ID; the [tool registry](https://github.com/paypal/agent-toolkit/blob/main/typescript/src/shared/tools.ts) does not list Payouts or webhook-signature verification. Adopting order/capture wrappers would require adapting those guarantees while retaining the REST service for the remaining flow, without improving this deterministic orchestrator. We therefore keep the existing client for all operations, host approval and audit enforcement. This is a source-level evaluation, not a claim that a particular package version was installed or tested.
 
 ## Fallback if Payouts is unavailable in the sandbox
 

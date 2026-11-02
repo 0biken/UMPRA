@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { AppError } from "@/lib/errors";
 import { NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/errors";
 import {
@@ -18,16 +20,12 @@ export async function POST(
     const { id } = await context.params;
     const { user } = await requireTournamentHost(id);
 
-    let retryPayoutId: string | undefined;
-    try {
-      const text = await req.text();
-      if (text) {
-        const body = JSON.parse(text) as { retryPayoutId?: string };
-        retryPayoutId = body.retryPayoutId;
-      }
-    } catch {
-      // empty body is valid for standard confirm
-    }
+    const text = await req.text();
+    let body: unknown = {};
+    try { body = text ? JSON.parse(text) : {}; } catch { throw new AppError("VALIDATION", "Invalid JSON confirmation.", 400); }
+    const parsed = z.object({ retryPayoutId: z.string().uuid().optional() }).strict().safeParse(body);
+    if (!parsed.success) throw new AppError("VALIDATION", "Invalid payout confirmation.", 400);
+    const retryPayoutId = parsed.data.retryPayoutId;
 
     if (retryPayoutId) {
       const payouts = await retryFailedPayoutItem(user.id, id, retryPayoutId);

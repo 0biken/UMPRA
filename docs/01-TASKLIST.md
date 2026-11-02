@@ -115,44 +115,44 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
 
 ## M7 — Plain-language setup
 
-- [ ] **T-070 Agent Toolkit evaluation** [CORE]. needs T-050. Check `@paypal/agent-toolkit` (TypeScript, sandbox mode). Use it for tool implementations where it covers order and capture calls; keep direct REST for payouts if the toolkit does not expose them. Record the decision in `04`.
+- [x] **T-070 Agent Toolkit evaluation** [CORE]. needs T-050. Check `@paypal/agent-toolkit` (TypeScript, sandbox mode). Use it for tool implementations where it covers order and capture calls; keep direct REST for payouts if the toolkit does not expose them. Record the decision in `04`.
   AC: decision documented; money flow tests still pass.
-- [ ] **T-071 Parse tournament prompt** [CORE]. needs T-025, T-042. `POST /api/tournaments/parse` returns a validated config preview or field-level problems. Nothing is saved.
+- [x] **T-071 Parse tournament prompt** [CORE]. needs T-025, T-042. `POST /api/tournaments/parse` returns a validated config preview or field-level problems. Nothing is saved.
   AC: unsupported requests (for example 16 players) get an explanation, not a silent change.
-- [ ] **T-072 Parse and confirm UI** [CORE]. needs T-071, T-004. Prompt box, parsed preview, edit fields, confirm.
+- [x] **T-072 Parse and confirm UI** [CORE]. needs T-071, T-004. Prompt box, parsed preview, edit fields, confirm.
   AC: "8-player knockout, $5 entry, winner 70%, runner-up 30%" yields the right config.
 
 ## M8 — Interface
 
 Build against `06` and `07`. Each task includes empty, loading, and error states.
 
-- [ ] **T-080 App shell** [CORE]. needs T-012, T-004. Header, role-aware nav, toasts, error boundary.
-- [ ] **T-081 Landing and judge quick start** [CORE]. needs T-014. What Umpra is in plain words, "Try as host", "Try as player", sandbox buyer credentials panel.
-- [ ] **T-082 Host dashboard** [CORE]. needs T-024. My tournaments, state pills, create button.
-- [ ] **T-083 Create tournament page** [CORE]. needs T-025, T-072. Form path and plain-language path.
-- [ ] **T-084 Tournament page** [CORE]. needs T-035. Header with state, prize pool plate, tabs: Bracket, Players, Activity, Ledger.
-- [ ] **T-085 Bracket view** [CORE]. needs T-084. SVG chalk-line bracket, winner line draw animation, tap a match for details.
-- [ ] **T-086 Join and pay flow** [CORE]. needs T-033. Gamertag and PayPal email form, redirect, return states (success, cancelled, failed).
-- [ ] **T-087 Player match panel** [CORE]. needs T-041. My next match, opponent, upload screenshot with preview, submission status.
-- [ ] **T-088 Dispute view** [CORE]. needs T-045. Both screenshots side by side, extracted data, agent summary, resolve controls.
-- [ ] **T-089 Payout review and confirm** [CORE]. needs T-061. Review table, irreversible-action dialog, one-tap confirm, result states.
-- [ ] **T-090 Activity feed** [CORE]. needs T-026. Agent log styled as the officials' report.
-- [ ] **T-091 Ledger tab** [CORE]. needs T-064.
+- [x] **T-080 App shell** [CORE]. needs T-012, T-004. Header, role-aware nav, toasts, error boundary.
+- [x] **T-081 Landing and judge quick start** [CORE]. needs T-014. What Umpra is in plain words, "Try as host", "Try as player", sandbox buyer credentials panel.
+- [x] **T-082 Host dashboard** [CORE]. needs T-024. My tournaments, state pills, create button.
+- [x] **T-083 Create tournament page** [CORE]. needs T-025, T-072. Form path and plain-language path.
+- [x] **T-084 Tournament page** [CORE]. needs T-035. Header with state, prize pool plate, tabs: Bracket, Players, Activity, Ledger.
+- [x] **T-085 Bracket view** [CORE]. needs T-084. SVG chalk-line bracket, winner line draw animation, tap a match for details.
+- [x] **T-086 Join and pay flow** [CORE]. needs T-033. Gamertag and PayPal email form, redirect, return states (success, cancelled, failed).
+- [x] **T-087 Player match panel** [CORE]. needs T-041. My next match, opponent, upload screenshot with preview, submission status.
+- [x] **T-088 Dispute view** [CORE]. needs T-045. Both screenshots side by side, extracted data, agent summary, resolve controls.
+- [x] **T-089 Payout review and confirm** [CORE]. needs T-061. Review table, irreversible-action dialog, one-tap confirm, result states.
+- [x] **T-090 Activity feed** [CORE]. needs T-026. Agent log styled as the officials' report.
+- [x] **T-091 Ledger tab** [CORE]. needs T-064.
 - [ ] **T-092 Accessibility and mobile pass** [CORE]. needs T-080. Focus states, labels, contrast, reduced motion, 360px layout for every screen.
 
 ## M9 — Demo mode and deploy (see `09`)
 
-- [ ] **T-100 Screenshot generator** [CORE]. needs T-040. Script that renders generic scoreboard PNGs (matching, mismatching, blurry, wrong players) for demo and tests. No third-party marks.
-- [ ] **T-101 Demo controls** [CORE]. needs T-100, T-051. With `DEMO_MODE=true`: fill remaining slots with bot players (flagged simulated), and submit bot results from the generated screenshots so a solo judge can complete a tournament.
+- [x] **T-100 Screenshot generator** [CORE]. needs T-040. Script that renders generic scoreboard PNGs (matching, mismatching, blurry, wrong players) for demo and tests. No third-party marks.
+- [x] **T-101 Demo controls** [CORE]. needs T-100, T-051. With `DEMO_MODE=true`: fill remaining slots with bot players (flagged simulated), and submit bot results from the generated screenshots so a solo judge can complete a tournament.
   AC: controls are absent and routes 404 when `DEMO_MODE=false`.
-- [ ] **T-102 Seed script** [CORE]. needs T-101. Demo host, demo players, ready-to-run scenarios.
+- [x] **T-102 Seed script** [CORE]. needs T-101. Demo host, demo players, ready-to-run scenarios.
 - [ ] **T-103 Deploy to Render** [CORE]. needs T-092, T-102. Web service, env vars, health check, scheduled job hitting `/api/agent/sweep`, PayPal webhook registered to the live URL.
   AC: a stranger completes the whole flow on the hosted link without setup.
 - [ ] **T-104 Fully autonomous payout toggle** [STRETCH]. needs T-103 and everything else CORE. Host setting that skips the confirm checkpoint; default off; audited loudly.
 
 ## M10 — Quality and submission
 
-- [ ] **T-110 Edge-case suite** [CORE]. needs T-064. Implement every row of `08 §Edge-case matrix`.
+- [x] **T-110 Edge-case suite** [CORE]. needs T-064. Implement every row of `08 §Edge-case matrix`.
 - [ ] **T-111 Sandbox integration tests** [CORE]. needs T-110. `test:sandbox` covers order, capture, refund, payout against the real sandbox.
 - [ ] **T-112 Playwright smoke** [CORE]. needs T-103. Host creates, bots fill, results submit, payout confirms, using demo mode.
 - [ ] **T-113 README and architecture notes** [CORE]. needs T-103. Per `09 §README outline`, including the AI tools used.
@@ -208,3 +208,8 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 - `T-062` — Implemented `sendPayoutBatch` (`src/server/paypal/payouts.ts`) sending `sender_batch_id = payout-{tournamentId}` (or `-retry-{n}` for single-item retries) and storing batch/item IDs (`EC-O2`, `EC-O4`).
 - `T-063` — Implemented `syncTournamentPayoutStatuses`, webhook payout item updates, and `retryFailedPayoutItem` transitioning the tournament to `paid` only when every item succeeds (`EC-O3`, `EC-O5`).
 - `T-064` — Implemented `getTournamentLedger` (`src/server/paypal/payouts.ts`) listing all entry payments in and payout items out and verifying `netBalanceCents === 0` once paid.
+- `T-070` — Evaluated `@paypal/agent-toolkit` from source (no request-ID control, no Payouts or webhook verification); decision to keep direct REST recorded in `04-PAYPAL.md`.
+- `T-071`/`T-072` — `POST /api/tournaments/parse` and `preview` (`src/server/agent/parse-tournament.ts`) plus `CreateTournamentFlow` UI; unsupported requests and malformed model output fall back to field-level problems.
+- `T-080`–`T-091` — App shell, landing, host dashboard, create page, tournament page with bracket/players/activity/ledger, join and pay, player match panel, dispute view, payout review dialog. Built and compiled (`build:check`); hosted visual pass still pending under T-092.
+- `T-100`–`T-102` — `scripts/make-screenshots.ts` (output in `public/demo-screenshots`), bot fill and submit under `src/server/demo/`, `/api/demo/*` routes gated by `DEMO_MODE`, and a seed script.
+- `T-110` — All 36 `08 §Edge-case matrix` IDs are referenced by tests (map in `docs/10-RELEASE.md`). Left unticked on purpose: T-031, T-092, T-103, T-111, T-112+ (need real services or hosted verification).

@@ -20,7 +20,7 @@ import {
 
 export const resolveDisputeSchema = z.object({
   resolution: z.enum(["winner_a", "winner_b"], {
-    errorMap: () => ({ message: "Choose either winner_a or winner_b." }),
+    error: "Choose either winner_a or winner_b.",
   }),
   note: z
     .string()

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
 import { cn } from "@/lib/utils";
-import type { UserRole } from "@/server/db/schema";
+import type { UserRole } from "@/lib/tournament-view";
 
 function RegisterForm() {
   const router = useRouter();

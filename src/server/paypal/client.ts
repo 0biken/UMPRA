@@ -1,3 +1,4 @@
+import { testOverrides } from "@/server/test-overrides";
 import { AppError } from "@/lib/errors";
 import { fromPayPalAmount, toPayPalAmount } from "@/lib/money";
 import { env } from "@/server/env";
@@ -482,6 +483,8 @@ export class HttpPayPalClient implements PayPalClient {
 let activePayPalClient: PayPalClient | null = null;
 
 export function getPayPalClient(): PayPalClient {
+  const override = testOverrides()?.paypal;
+  if (override) return override;
   if (!activePayPalClient) {
     activePayPalClient = new HttpPayPalClient();
   }

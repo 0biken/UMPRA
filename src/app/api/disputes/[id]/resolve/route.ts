@@ -1,3 +1,4 @@
+import { readJson } from "@/server/input";
 import { NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/errors";
 import { assertSameOrigin, requireUser } from "@/server/auth/guards";
@@ -12,7 +13,7 @@ export async function POST(
     assertSameOrigin(req);
     const user = await requireUser("host");
     const { id: disputeId } = await context.params;
-    const body = await req.json();
+    const body = await readJson(req);
 
     const result = await resolveDisputeByHost(user.id, disputeId, body);
 

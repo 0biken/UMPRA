@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-import { SESSION_COOKIE_NAME } from "@/server/auth/session";
+import { SESSION_COOKIE_NAME } from "@/lib/session-constants";
 import type { UserRole } from "@/server/db/schema";
 
 export type RouteAccessDecision =

@@ -81,25 +81,8 @@ export async function draftTournamentPayouts(
     2: runnerUpId,
   };
 
-  // Read live prize pool from captured payments (fallback to 8 * entryFeeCents only when all entries are simulated demo bots without payment rows)
-  let poolCents = await getLivePrizePoolCents(tournamentId, txOrDb);
-  if (poolCents === 0) {
-    const paidEntries = await txOrDb
-      .select()
-      .from(entries)
-      .where(
-        and(
-          eq(entries.tournamentId, tournamentId),
-          eq(entries.status, "paid")
-        )
-      );
-    if (
-      paidEntries.length === tournament.slots &&
-      paidEntries.every((e) => e.simulated)
-    ) {
-      poolCents = tournament.slots * tournament.entryFeeCents;
-    }
-  }
+  // Only verified captures fund the pool. Simulated entries contribute zero.
+  const poolCents = await getLivePrizePoolCents(tournamentId, txOrDb);
 
   if (poolCents <= 0) {
     throw new AppError(
@@ -665,41 +648,17 @@ export async function retryFailedPayoutItem(
     );
   }
 
-  const [row] = await db
-    .select()
-    .from(payouts)
-    .where(
-      and(eq(payouts.id, payoutId), eq(payouts.tournamentId, tournamentId))
-    )
-    .limit(1);
-
-  if (!row) {
-    throw new AppError("NOT_FOUND", "Payout item not found.", 404);
-  }
-  if (row.status !== "failed" && row.status !== "unclaimed") {
-    throw new AppError(
-      "INVALID_TRANSITION",
-      `Only failed or unclaimed payout items can be retried (current status: ${row.status}).`,
-      409
-    );
-  }
-
-  const retryMatch = row.senderBatchId.match(/-retry-(\d+)$/);
-  const nextRetryNum = retryMatch ? Number.parseInt(retryMatch[1], 10) + 1 : 1;
-  const newSenderBatchId = payoutBatchId(tournamentId, nextRetryNum);
-  const newSenderItemId = `${payoutItemId(tournamentId, row.place)}-r${nextRetryNum}`;
-
-  await db
-    .update(payouts)
-    .set({
-      status: "approved",
-      approvedBy: hostId,
-      approvedAt: now,
-      senderBatchId: newSenderBatchId,
-      senderItemId: newSenderItemId,
-      error: null,
-    })
-    .where(eq(payouts.id, row.id));
+  const row = await db.transaction(async tx => {
+    const [fresh] = await tx.select().from(payouts).where(and(eq(payouts.id, payoutId), eq(payouts.tournamentId, tournamentId))).limit(1).for("update");
+    if (!fresh) throw new AppError("NOT_FOUND", "Payout item not found.", 404);
+    if (["approved", "submitted", "succeeded"].includes(fresh.status) && fresh.senderBatchId.includes("-retry-")) return fresh;
+    if (fresh.status !== "failed" && fresh.status !== "unclaimed") throw new AppError("INVALID_TRANSITION", "Only failed or unclaimed payout items can be retried.", 409);
+    const match = fresh.senderBatchId.match(/-retry-(\d+)$/);
+    const next = match ? Number(match[1]) + 1 : 1;
+    const [updated] = await tx.update(payouts).set({ status: "approved", approvedBy: hostId, approvedAt: now, senderBatchId: payoutBatchId(tournamentId, next), senderItemId: `${payoutItemId(tournamentId, fresh.place)}-r${next}`, error: null }).where(eq(payouts.id, fresh.id)).returning();
+    await audit(tx, { tournamentId, actorType: "user", actorId: hostId, action: "payout.retry_approved", payload: { payoutId: fresh.id, attempt: next }, dedupeKey: `retry-approve:${updated.senderBatchId}:${fresh.id}` });
+    return updated;
+  });
 
   return sendPayoutBatch(tournamentId, {
     paypal: options?.paypal,
@@ -817,7 +776,7 @@ export async function getPayoutReviewData(
     0
   );
   const livePool = await getLivePrizePoolCents(tournamentId);
-  const poolCents = livePool > 0 ? livePool : totalPayoutCents;
+  const poolCents = livePool;
 
   return {
     tournamentId: tournament.id,

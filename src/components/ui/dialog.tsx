@@ -4,7 +4,6 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
 
-export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogPortal = DialogPrimitive.Portal;
 export const DialogClose = DialogPrimitive.Close;
@@ -67,3 +66,52 @@ export const DialogDescription = React.forwardRef<
   />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
+
+export interface ManagedDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  actions?: React.ReactNode;
+  children?: React.ReactNode;
+}
+
+export function Dialog({
+  open,
+  onOpenChange,
+  onClose,
+  title,
+  description,
+  actions,
+  children,
+}: ManagedDialogProps) {
+  const descriptionId = React.useId();
+  const handleOpenChange = (next: boolean) => {
+    onOpenChange?.(next);
+    if (!next) onClose?.();
+  };
+
+  if (title !== undefined || description !== undefined || actions !== undefined) {
+    return (
+      <DialogPrimitive.Root open={open} onOpenChange={handleOpenChange}>
+        <DialogContent aria-describedby={description ? descriptionId : undefined}>
+          {title && <DialogTitle>{title}</DialogTitle>}
+          {description && <DialogDescription id={descriptionId}>{description}</DialogDescription>}
+          {children && <div className="mt-3">{children}</div>}
+          {actions && (
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-2.5">
+              {actions}
+            </div>
+          )}
+        </DialogContent>
+      </DialogPrimitive.Root>
+    );
+  }
+
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={handleOpenChange}>
+      {children}
+    </DialogPrimitive.Root>
+  );
+}

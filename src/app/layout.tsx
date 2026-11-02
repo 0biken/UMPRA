@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Public_Sans } from "next/font/google";
+import { ToastProvider } from "@/components/ui/toast";
+import { AppHeader } from "@/components/layout/AppShell";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -27,7 +29,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${bricolage.variable} ${publicSans.variable}`}>
-      <body className="min-h-screen bg-chalk text-ink antialiased">{children}</body>
+      <body className="min-h-screen bg-chalk text-ink antialiased">
+        <ToastProvider>
+          <AppHeader />
+          {children}
+        </ToastProvider>
+      </body>
     </html>
   );
 }

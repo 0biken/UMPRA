@@ -39,7 +39,7 @@ export function PrizePlate({
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-chalk/15 pt-3">
           <div
             className="flex items-center gap-2"
-            aria-label={`${paidCount} of ${totalSlots} slots paid`}
+            aria-label={`${paidCount} of ${totalSlots} slots filled`}
           >
             {slots.map((isPaid, i) => (
               <span

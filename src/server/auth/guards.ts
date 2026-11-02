@@ -73,14 +73,8 @@ export function assertSameOrigin(
     throw new AppError("FORBIDDEN", "Malformed Origin header.", 403);
   }
 
-  // Also allow matching the request's own Host header when running locally or on preview URLs if it matches APP_URL
-  const reqHost = req.headers.get("host");
-  if (originHost !== expectedHost && (!reqHost || originHost !== reqHost)) {
-    throw new AppError(
-      "FORBIDDEN",
-      "Cross-origin mutating requests are not allowed.",
-      403
-    );
+  if (originHost !== expectedHost || new URL(originHeader).protocol !== new URL(env.APP_URL).protocol) {
+    throw new AppError("FORBIDDEN", "Cross-origin mutating requests are not allowed.", 403);
   }
 
   if (!options?.allowEmptyBody) {

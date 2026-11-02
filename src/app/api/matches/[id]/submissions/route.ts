@@ -1,3 +1,4 @@
+import { readScreenshotForm } from "@/server/input";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { AppError, toErrorResponse } from "@/lib/errors";
@@ -15,7 +16,7 @@ export async function POST(
     const user = await requireUser("player");
     const { id: matchId } = await context.params;
 
-    const formData = await req.formData();
+    const formData = await readScreenshotForm(req);
     const file = formData.get("screenshot") ?? formData.get("file");
 
     if (!file || !(file instanceof File)) {

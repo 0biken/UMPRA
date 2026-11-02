@@ -4,18 +4,12 @@ import path from "path";
 export default defineConfig({
   test: {
     environment: "node",
+    exclude: ["**/node_modules/**", "**/.cache/**", "tests/sandbox/**", "tests/e2e/**"],
     globals: true,
     fileParallelism: false,
     hookTimeout: 30000,
     testTimeout: 30000,
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-      forks: {
-        singleFork: true,
-      },
-    },
+    maxWorkers: 1,
     env: {
       APP_URL: "http://localhost:3000",
       DATABASE_URL: "pglite://memory",

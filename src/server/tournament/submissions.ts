@@ -31,6 +31,7 @@ export async function submitMatchScreenshot(
   options?: {
     storage?: StorageProvider;
     now?: Date;
+    replaceExisting?: boolean;
   }
 ): Promise<typeof submissions.$inferSelect> {
   validateScreenshotUpload({
@@ -102,7 +103,7 @@ export async function submitMatchScreenshot(
       .select()
       .from(matches)
       .where(eq(matches.id, match.id))
-      .limit(1);
+      .limit(1).for("update");
 
     if (!freshMatch || freshMatch.status !== "awaiting_results") {
       throw new AppError(
@@ -122,6 +123,8 @@ export async function submitMatchScreenshot(
         )
       )
       .limit(1);
+
+    if (existingSub && options?.replaceExisting === false) return existingSub;
 
     let subRow: typeof submissions.$inferSelect;
     if (existingSub) {

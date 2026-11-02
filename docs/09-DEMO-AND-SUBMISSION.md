@@ -19,7 +19,9 @@ Demo bots are marked `simulated` on their entries: they take slots without a rea
 
 ## Seed script (`npm run db:seed`)
 
-Creates the demo host, eight demo players, and optionally one tournament in each of: open (empty), open (6 of 8 paid), in progress (round 2 with a dispute), confirmed (payout ready). Idempotent: re-running does not duplicate.
+Requires demo mode and eight configured sandbox recipient emails. Creates a demo host, eight demo players, and one empty open tournament. Rerunning is idempotent. Optional advanced pre-completed scenarios are omitted: seed scripts must never invent captures or payout-ready balances. Live demo controls generate and store real scoreboard images through the normal submission/vision pipeline.
+
+Demo filling requires at least one verified capture first. Simulated entries occupy seats without payment rows. A $5 capture plus seven bots yields a $5 pool ($3.50/$1.50 at 70/30), not $40. The all-bot payout fallback is removed. No simulated payout provider is enabled.
 
 ## Demo video script (under 3 minutes)
 
@@ -76,3 +78,5 @@ Best Use of PayPal + AI, Best Use of Agentic Commerce, Most Impactful, Best Demo
 ## Open items for the human
 
 Name check for "Umpra" (domain, GitHub, trademark) · real organizer quotes (T-114) · create the sandbox accounts above · confirm Payouts works in the sandbox (T-031) · read the Official Rules for payout restrictions · decide the Agent Toolkit question at T-070.
+
+Deadline source checked November 1, 2026: [official rules](https://paypalaihackathon.devpost.com/rules) state November 12, 2026 at 12:00 noon PST (21:00 Lagos). Eligibility and final submission remain human tasks. See `10-RELEASE.md` and `11-SUBMISSION-DRAFT.md` for evidence gates and the updated $5-funded video script.

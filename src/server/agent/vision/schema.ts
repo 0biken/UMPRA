@@ -15,7 +15,8 @@ export const ExtractionSchema = z.object({
   notes: z.string().max(200),
 });
 
-export type Extraction = z.infer<typeof ExtractionSchema>;
+export type { Extraction } from "@/lib/vision-types";
+import type { Extraction } from "@/lib/vision-types";
 
 export type ParseExtractionOutcome =
   | { status: "ok"; data: Extraction }
@@ -68,4 +69,10 @@ export function parseVisionExtractionOutput(
   }
 
   return { status: "ok", data: validated.data };
+}
+
+export function stripCodeFences(raw: string): string {
+  const trimmed = raw.trim();
+  const fence = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  return fence?.[1]?.trim() ?? trimmed;
 }

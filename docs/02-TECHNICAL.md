@@ -332,3 +332,14 @@ One web service (Node, `npm run build` then `npm start`), health check `/api/hea
 ## Security checklist
 
 Hashed passwords (bcrypt) · httpOnly, secure, sameSite=lax session cookie · Origin check on mutating routes · zod on all inputs · webhook signature verification · uploads limited by size and type, stored privately with signed URLs · host-ownership checks on every host route · screenshots treated as untrusted data · no secrets in repo.
+
+## Completion implementation notes
+
+- `POST /api/tournaments/preview`: host-only, same-origin, validates the shared config and returns projected pool/payouts without persistence. The UI does not import server payout math.
+- `POST /api/tournaments/:id/payout/retry`: owning host only; body `{ payoutId }`. Retry numbers come from stored rows, never the browser. Repeated confirmation resumes the approved retry batch.
+- `GET /api/submissions/:id/image`: authenticated match participant or owning host; redirects to a 60-second private signed URL, no-store. Missing storage is an error, never a synthesized replacement image.
+- Tournament GET accepts the session identity for field-level redaction. Public reads omit PayPal emails, storage paths, extraction content for unrelated viewers, raw audit payloads and private dispute summaries. Drafts are host-only.
+- Migration `0001_server_only_rls` enables RLS without browser policies on all app tables. Server uses a privileged connection; custom sessions are not Supabase Auth identities.
+- `DEMO_PAYPAL_RECIPIENTS`: optional generally, required for demo bot filling/seeding; comma-separated eight sandbox personal recipient emails in player order. `DEMO_BUYER_EMAIL` / `DEMO_BUYER_PASSWORD`: optional sandbox credentials intentionally displayed only in demo mode.
+- `SANDBOX_APPROVED_ORDER_ID` / `SANDBOX_PAYOUT_RECIPIENT`: integration-test prerequisites; no production accounts.
+- `UMPRA_E2E=1` is internal automated-test configuration, refused outside development with exact local test credentials and in-memory DB. Never set it on Render.
