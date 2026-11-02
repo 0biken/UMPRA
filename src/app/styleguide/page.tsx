@@ -140,8 +140,8 @@ export default function StyleguidePage() {
             error="Enter a valid PayPal sandbox personal account email."
           />
           <SelectField label="Role" defaultValue="player">
-            <option value="player">Player — join and compete</option>
-            <option value="host">Host — run tournaments</option>
+            <option value="player">Player: join and compete</option>
+            <option value="host">Host: run tournaments</option>
           </SelectField>
           <Textarea
             label="Describe your tournament"

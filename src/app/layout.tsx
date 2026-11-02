@@ -17,7 +17,7 @@ const publicSans = Public_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Umpra — Autonomous Tournament Umpire",
+  title: "Umpra: autonomous tournament umpire",
   description:
     "Set up an 8-player tournament, verify match screenshots with AI, and release the prize pool via PayPal.",
 };

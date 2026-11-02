@@ -12,7 +12,7 @@ export default function HomePage() {
   return (
     <main className="mx-auto max-w-[1120px] px-4 py-6 sm:px-6 lg:px-8 space-y-8">
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           <h1 className="type-display max-w-[22ch]">
             An autonomous tournament umpire that holds the prize pool and pays the winners.
           </h1>

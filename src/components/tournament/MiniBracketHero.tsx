@@ -17,7 +17,7 @@ export function MiniBracketHero() {
   return (
     <div
       aria-label="Illustration of Umpra advancing a verified match winner across the bracket"
-      className="rounded-[var(--radius-panel)] border border-line bg-paper p-4 sm:p-5"
+      className="min-w-0 rounded-[var(--radius-panel)] border border-line bg-paper p-4 sm:p-5"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="inline-flex items-center gap-2 type-small font-medium text-ink">

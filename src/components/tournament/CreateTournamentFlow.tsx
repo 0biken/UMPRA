@@ -318,13 +318,13 @@ export function CreateTournamentFlow() {
           <div className="flex items-center justify-between py-2.5">
             <dt className="text-muted">Entry fee</dt>
             <dd className="font-medium tabular-nums text-ink">
-              {feeValid ? formatUsd(entryFeeCents) : "—"}
+              {feeValid ? formatUsd(entryFeeCents) : "-"}
             </dd>
           </div>
           <div className="flex items-center justify-between py-2.5">
             <dt className="text-muted">Projected prize pool (8 paid)</dt>
             <dd className="font-semibold tabular-nums text-ink">
-              {feeValid ? formatUsd(projectedPoolCents) : "—"}
+              {feeValid ? formatUsd(projectedPoolCents) : "-"}
             </dd>
           </div>
           {previewPayouts.map((row) => (

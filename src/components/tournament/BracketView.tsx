@@ -73,7 +73,7 @@ export function MatchCard({
               aWon ? "font-bold text-pitch" : "text-muted"
             }`}
           >
-            {match.scoreA ?? "—"}
+            {match.scoreA ?? "-"}
           </span>
         </div>
         <div
@@ -93,7 +93,7 @@ export function MatchCard({
               bWon ? "font-bold text-pitch" : "text-muted"
             }`}
           >
-            {match.scoreB ?? "—"}
+            {match.scoreB ?? "-"}
           </span>
         </div>
       </button>

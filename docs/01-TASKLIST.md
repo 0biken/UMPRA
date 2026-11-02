@@ -126,6 +126,8 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
 
 Build against `06` and `07`. Each task includes empty, loading, and error states.
 
+Audit findings for the existing M8 screens are in `docs/12-FRONTEND-AUDIT.md`. Fix them as part of the task they are grouped under.
+
 - [x] **T-080 App shell** [CORE]. needs T-012, T-004. Header, role-aware nav, toasts, error boundary.
 - [x] **T-081 Landing and judge quick start** [CORE]. needs T-014. What Umpra is in plain words, "Try as host", "Try as player", sandbox buyer credentials panel.
 - [x] **T-082 Host dashboard** [CORE]. needs T-024. My tournaments, state pills, create button.
@@ -214,3 +216,4 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 - `T-100`–`T-102` — `scripts/make-screenshots.ts` (output in `public/demo-screenshots`), bot fill and submit under `src/server/demo/`, `/api/demo/*` routes gated by `DEMO_MODE`, and a seed script.
 - `T-110` — All 36 `08 §Edge-case matrix` IDs are referenced by tests (map in `docs/10-RELEASE.md`). Left unticked on purpose: T-031, T-092, T-103, T-111, T-112+ (need real services or hosted verification).
 - `T-112` — `npm run test:e2e` passes at 360px and 1280px against local in-memory providers (checkout return, dispute ruling, payout dialog, receipt, balanced ledger). Not yet run against hosted services.
+- `Phase 0 frontend audit` - Committed the M7-M10 work as `f747762`; walked the screens at 360px; fixed the landing page overflow (bracket SVG stretched the grid column) and 11 em-dashes; wrote `docs/12-FRONTEND-AUDIT.md`. Typecheck and lint clean; `npm test` crashes workers on low-memory machines but all 12 files pass individually. No M8 boxes ticked yet.

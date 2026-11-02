@@ -91,7 +91,7 @@ export function LedgerTable({ ledger }: { ledger: LedgerData }) {
                     <StatusBadge status={row.status} />
                   </td>
                   <td className="px-4 py-3 font-mono type-caption text-muted">
-                    {row.paypalId ?? "—"}
+                    {row.paypalId ?? "-"}
                   </td>
                   <td
                     className={`px-4 py-3 text-right font-semibold tabular-nums ${

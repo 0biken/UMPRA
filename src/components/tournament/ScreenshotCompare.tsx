@@ -78,7 +78,7 @@ export function ScreenshotCompare({
             <dd className="font-medium tabular-nums text-ink">
               {ext?.home?.name
                 ? `${ext.home.name} (${ext.home.score ?? "?"})`
-                : "—"}
+                : "-"}
             </dd>
           </div>
           <div className="flex items-center justify-between py-1.5">
@@ -86,7 +86,7 @@ export function ScreenshotCompare({
             <dd className="font-medium tabular-nums text-ink">
               {ext?.away?.name
                 ? `${ext.away.name} (${ext.away.score ?? "?"})`
-                : "—"}
+                : "-"}
             </dd>
           </div>
           <div className="flex items-center justify-between py-1.5">
@@ -96,7 +96,7 @@ export function ScreenshotCompare({
                 ? `${Math.round(side.confidence * 100)}%`
                 : ext?.confidence !== undefined
                   ? `${Math.round(ext.confidence * 100)}%`
-                  : "—"}
+                  : "-"}
             </dd>
           </div>
           {ext?.notes && (
