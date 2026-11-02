@@ -56,7 +56,6 @@ export function ActivityLog({ items }: { items: ActivityLogItem[] }) {
                     isDispute ? "text-red-ink" : "text-pitch"
                   }`}
                   strokeWidth={1.75}
-                  aria-label="Umpra agent action"
                 />
               ) : (
                 <User
@@ -64,7 +63,6 @@ export function ActivityLog({ items }: { items: ActivityLogItem[] }) {
                     isDispute ? "text-red-ink" : "text-ink-2"
                   }`}
                   strokeWidth={1.75}
-                  aria-label="User action"
                 />
               )}
             </span>
@@ -79,6 +77,7 @@ export function ActivityLog({ items }: { items: ActivityLogItem[] }) {
                       : "text-ink-2"
                 }`}
               >
+                <span className="sr-only">{isAgent ? "Umpra: " : "Person: "}</span>
                 {item.sentence}
               </p>
             </div>

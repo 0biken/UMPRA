@@ -118,13 +118,13 @@ Build on shadcn/ui primitives (Radix), restyled with the tokens. Show every stat
 | Input, Select, Textarea | Height 44, paper, 1px line-strong border, radius field, visible label above, helper text below, error state with red border, red-ink message and icon |
 | StatePill | Pill radius, 28px tall, icon plus label, colours from the state table in `06` |
 | Panel | Paper, 1px line border, radius panel, no shadow |
-| PrizePlate | The key number. Ink background, chalk text, display type for the amount, a yellow top rule (3px) and the caption "Held by Umpra until the host confirms the payout." Beneath: 8 slot markers (filled pitch circle when paid, outlined when open) and "$X of $40 collected" |
+| PrizePlate | The key number. Ink background, chalk text, display type for the amount, a yellow top rule (3px) and the caption "Held by Umpra until the host confirms the payout." Beneath: 8 slot markers (filled pitch for paid, pitch outline for simulated demo players, chalk outline for open slots) and "$X of $40 collected". Explain that demo players add no money. |
 | BracketView | SVG. Match cards 160 x 64, radius field, paper with line border; connector lines 2px `line-strong`; confirmed winner's path 2px `pitch`. Draws left to right in rounds. Mobile: round selector plus scrollable full view |
 | MatchCard | Two rows (player, score). Winner row bold with pitch left rule; loser muted. Status chip under the card for non-final states |
 | ScreenshotUploader | Drop zone with camera and file choices on mobile, preview, replace, size and type hint, client-side resize |
 | ScreenshotCompare | Two images side by side (stacked on mobile), each with the extracted name, score, and confidence beneath |
 | ActivityLog | The officials' report: a vertical list; each row has time (caption), a glyph (Flag icon for agent, person icon for users), and the sentence from `05`. Agent rows use ink text; the row for a dispute uses red-tint background |
-| LedgerTable | Tabular numerals, right-aligned amounts, status pills, totals row, horizontally scrollable on mobile |
+| LedgerTable | Tabular numerals, right-aligned amounts, status pills, totals row, stacked rows on mobile with amounts visible |
 | Dialog | Panel radius, `shadow-float`, focus trapped; the payout dialog has the irreversible sentence in h3 and two buttons, "Go back" secondary first, "Send payout" primary |
 | Toast | Bottom on mobile, top-right on desktop; same verb as the button that caused it |
 | Banner | Full-width within content, tinted background plus icon plus text plus optional action; variants info (pitch), attention (yellow), problem (red) |

@@ -8,6 +8,7 @@ export interface UnifiedPrizePlateProps extends Partial<BasePrizePlateProps> {
   poolCents?: number;
   maxPoolCents?: number;
   paidSlots?: number;
+  simulatedSlots?: number;
   totalSlots?: number;
   className?: string;
 }
@@ -19,6 +20,7 @@ export function PrizePlate({
   poolCents,
   maxPoolCents,
   paidSlots,
+  simulatedSlots,
   totalSlots = 8,
   className,
 }: UnifiedPrizePlateProps) {
@@ -27,6 +29,7 @@ export function PrizePlate({
       collectedCents={collectedCents ?? poolCents ?? 0}
       projectedPoolCents={projectedPoolCents ?? maxPoolCents ?? 0}
       paidCount={paidCount ?? paidSlots ?? 0}
+      simulatedCount={simulatedSlots ?? 0}
       totalSlots={totalSlots}
       className={className}
     />

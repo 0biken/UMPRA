@@ -34,7 +34,7 @@ export function MiniBracketHero() {
           viewBox="0 0 540 164"
           className="h-[154px] w-full min-w-[400px]"
           role="img"
-          aria-label="Semi-final matches connecting into the final match"
+          aria-label="Semifinal matches connecting into the final match"
         >
           {/* Base connector lines in line-strong */}
           <path

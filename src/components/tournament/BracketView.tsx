@@ -209,8 +209,8 @@ export function BracketView({
       <div className="flex flex-wrap items-center gap-1.5 md:hidden">
         {[
           { key: "full", label: "Full bracket" },
-          { key: "r1", label: "Quarter-finals" },
-          { key: "r2", label: "Semi-finals" },
+          { key: "r1", label: "Quarterfinals" },
+          { key: "r2", label: "Semifinals" },
           { key: "r3", label: "Final" },
         ].map((tab) => (
           <button
@@ -264,8 +264,8 @@ export function BracketView({
       >
         <div className="min-w-[640px]">
           <div className="mb-3 grid grid-cols-3 type-caption font-semibold text-muted">
-            <div>Quarter-finals</div>
-            <div className="pl-6">Semi-finals</div>
+            <div>Quarterfinals</div>
+            <div className="pl-6">Semifinals</div>
             <div className="pl-12">Final</div>
           </div>
 
@@ -349,11 +349,11 @@ export function BracketView({
           selectedMatch
             ? `${
                 selectedMatch.round === 1
-                  ? "Quarter-final"
+                  ? "Quarterfinal"
                   : selectedMatch.round === 2
-                    ? "Semi-final"
+                    ? "Semifinal"
                     : "Final"
-              } · ${selectedMatch.playerAGamertag ?? "Waiting"} vs ${
+              }: ${selectedMatch.playerAGamertag ?? "Waiting"} vs ${
                 selectedMatch.playerBGamertag ?? "Waiting"
               }`
             : "Match details"
@@ -378,11 +378,11 @@ export function BracketView({
             {isHost &&
               selectedMatch?.status === "disputed" &&
               selectedMatch.dispute && (
-                <Link
-                  href={`/host/t/${tournamentId}/disputes/${selectedMatch.dispute.id}`}
-                >
-                  <Button variant="primary">Resolve dispute</Button>
-                </Link>
+                <Button asChild variant="primary">
+                  <Link href={`/host/t/${tournamentId}/disputes/${selectedMatch.dispute.id}`}>
+                    Resolve dispute
+                  </Link>
+                </Button>
               )}
           </div>
         }

@@ -45,9 +45,9 @@ export function PlayerMatchPanel({
 
   const roundLabel =
     currentMatch.round === 1
-      ? "Round 1 (Quarter-final)"
+      ? "Round 1 (Quarterfinal)"
       : currentMatch.round === 2
-        ? "Round 2 (Semi-final)"
+        ? "Round 2 (Semifinal)"
         : "Final";
 
   const mySub = currentMatch.submissions.find((s) => s.playerId === playerId);

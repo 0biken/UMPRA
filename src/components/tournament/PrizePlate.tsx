@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils";
 export interface PrizePlateProps {
   collectedCents: number;
   projectedPoolCents: number;
+  /** Filled slots, real and simulated. */
   paidCount: number;
+  /** How many of the filled slots are simulated demo players (they add no money). */
+  simulatedCount?: number;
   totalSlots?: number;
   className?: string;
 }
@@ -14,10 +17,15 @@ export function PrizePlate({
   collectedCents,
   projectedPoolCents,
   paidCount,
+  simulatedCount = 0,
   totalSlots = 8,
   className,
 }: PrizePlateProps) {
-  const slots = Array.from({ length: totalSlots }, (_, idx) => idx < paidCount);
+  const simulated = Math.min(Math.max(simulatedCount, 0), paidCount);
+  const real = paidCount - simulated;
+  const slots = Array.from({ length: totalSlots }, (_, idx) =>
+    idx < real ? "paid" : idx < paidCount ? "simulated" : "open"
+  );
 
   return (
     <div
@@ -39,16 +47,22 @@ export function PrizePlate({
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-chalk/15 pt-3">
           <div
             className="flex items-center gap-2"
-            aria-label={`${paidCount} of ${totalSlots} slots filled`}
+            role="img"
+            aria-label={
+              simulated > 0
+                ? `${real} paid, ${simulated} simulated demo players, ${totalSlots - paidCount} open`
+                : `${paidCount} of ${totalSlots} slots paid`
+            }
           >
-            {slots.map((isPaid, i) => (
+            {slots.map((kind, i) => (
               <span
                 key={i}
+                aria-hidden="true"
                 className={cn(
-                  "inline-block h-3.5 w-3.5 rounded-full border transition-colors duration-[var(--dur-fast)]",
-                  isPaid
-                    ? "border-pitch bg-pitch"
-                    : "border-chalk/50 bg-transparent"
+                  "inline-block h-3.5 w-3.5 rounded-full border-2 transition-colors duration-[var(--dur-fast)]",
+                  kind === "paid" && "border-pitch bg-pitch",
+                  kind === "simulated" && "border-pitch bg-transparent",
+                  kind === "open" && "border-chalk/40 bg-transparent"
                 )}
               />
             ))}
@@ -58,6 +72,11 @@ export function PrizePlate({
             {formatUsd(projectedPoolCents, { trimZeroCents: true })} collected
           </span>
         </div>
+        {simulated > 0 && (
+          <p className="type-caption mt-2 text-chalk/80">
+            {simulated} of {paidCount} filled slots are simulated demo players and add no money.
+          </p>
+        )}
       </div>
     </div>
   );

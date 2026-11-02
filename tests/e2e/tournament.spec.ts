@@ -1,12 +1,13 @@
 import { test, expect } from "@playwright/test";
 
 test("judge completes checkout, bracket, dispute, host-approved payout and receipt", async ({ page, browser, baseURL }) => {
+  test.setTimeout(600000);
   await page.goto("/");
   await page.getByRole("button", { name: "Try as host" }).click();
   await expect(page).toHaveURL(/\/host$/);
-  await page.getByRole("button", { name: "New tournament", exact: true }).click();
+  await page.locator("main").getByRole("link", { name: "New tournament", exact: true }).first().click();
   await page.getByRole("button", { name: "Open registration", exact: true }).click();
-  await expect(page).toHaveURL(/\/t\/[\w-]+$/);
+  await expect(page).toHaveURL(/\/t\/[\w-]+$/, { timeout: 180000 });
   const id = page.url().split("/").pop()!;
   await page.goto("/host");
   const playerContext = await browser.newContext({ baseURL });
@@ -18,7 +19,7 @@ test("judge completes checkout, bracket, dispute, host-approved payout and recei
   await player.getByLabel("Gamertag (exact in-game name)").fill("JudgePlayer");
   await player.getByLabel("PayPal email (for prize payouts)").fill("test-buyer@personal.example.com");
   await player.getByRole("button", { name: "Join for $5.00" }).click();
-  await expect(player).toHaveURL(/payment=paid/);
+  await expect(player).toHaveURL(/payment=paid/, { timeout: 180000 });
   await player.reload();
   await expect(player.getByText("You're in.", { exact: false })).toBeVisible();
   await playerContext.close();

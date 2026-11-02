@@ -385,6 +385,6 @@ export async function advanceWinner(
 export function getRoundName(round: number): string {
   if (round === 1) return "Quarterfinals";
   if (round === 2) return "Semifinals";
-  if (round === 3) return " the Final";
+  if (round === 3) return "the Final";
   return `Round ${round}`;
 }

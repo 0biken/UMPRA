@@ -20,6 +20,8 @@ import { PlayerMatchPanel } from "./PlayerMatchPanel";
 import { DemoControlsPanel } from "./DemoControlsPanel";
 import type { TournamentState, TournamentDetailsResponse } from "@/lib/tournament-view";
 
+type TabKey = "bracket" | "players" | "activity" | "ledger";
+
 export function TournamentViewClient({
   tournamentId,
   demoMode = false,
@@ -42,9 +44,7 @@ export function TournamentViewClient({
   } | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [activeTab, setActiveTab] = React.useState<
-    "bracket" | "players" | "activity" | "ledger" | null
-  >(null);
+  const [activeTab, setActiveTab] = React.useState<TabKey | null>(null);
   const [liveAnnouncement, setLiveAnnouncement] = React.useState("");
   const [actionLoading, setActionLoading] = React.useState(false);
   const requestInFlight = React.useRef(false);
@@ -217,7 +217,29 @@ export function TournamentViewClient({
     .filter((m) => m.status === "disputed" && m.dispute?.status === "open")
     .map((m) => ({ match: m, dispute: m.dispute! }));
 
+  const filledEntries = entries.filter((entry) => entry.status === "paid");
+  const realPaidCount = filledEntries.filter((entry) => !entry.simulated).length;
   const tab = activeTab ?? "bracket";
+
+  // Demo controls (DEMO_MODE only). While the field is filling they sit above the tabs,
+  // because that is when they are needed. Once play starts the bracket leads and they follow it.
+  const demoPanel =
+    demoMode && isHostOwner ? (
+      <DemoControlsPanel
+        tournamentId={tournament.id}
+        state={tournament.state}
+        paidCount={data.paidCount}
+        matches={matches}
+        onUpdated={() => loadTournament(true)}
+      />
+    ) : null;
+  const demoFirst = tournament.state === "draft" || tournament.state === "open";
+  const tabItems: Array<{ key: TabKey; label: string }> = [
+    { key: "bracket", label: "Bracket" },
+    { key: "players", label: `Players (${data.paidCount}/${tournament.slots})` },
+    { key: "activity", label: `Activity (${activity.length})` },
+    { key: "ledger", label: "Ledger" },
+  ];
 
   return (
     <main className="mx-auto max-w-[1120px] px-4 py-6 sm:px-6 lg:px-8 space-y-6">
@@ -255,9 +277,10 @@ export function TournamentViewClient({
             <h1 className="type-h1">{tournament.title}</h1>
             <StatePill state={tournament.state} />
           </div>
-          <p className="type-small text-muted">
-            {tournament.game} · {formatUsd(tournament.entryFeeCents)} entry · Hosted by{" "}
-            {tournament.hostDisplayName} · Terms locked once registration opens
+          <p className="type-small flex flex-wrap gap-x-4 gap-y-0.5 text-muted">
+            <span>{tournament.game}</span>
+            <span>{formatUsd(tournament.entryFeeCents)} entry</span>
+            <span>Hosted by {tournament.hostDisplayName}</span>
           </p>
         </div>
 
@@ -289,6 +312,9 @@ export function TournamentViewClient({
         poolCents={data.prizePoolCents}
         maxPoolCents={data.maxPrizePoolCents}
         paidSlots={data.paidCount}
+        simulatedSlots={
+          entries.filter((e) => e.status === "paid" && e.simulated).length
+        }
         totalSlots={tournament.slots}
       />
 
@@ -305,7 +331,7 @@ export function TournamentViewClient({
                 <div className="type-h3 text-ink">
                   1st: {tournament.championGamertag}
                   {tournament.runnerUpGamertag
-                    ? ` · 2nd: ${tournament.runnerUpGamertag}`
+                    ? `, 2nd: ${tournament.runnerUpGamertag}`
                     : ""}
                 </div>
               </div>
@@ -345,13 +371,13 @@ export function TournamentViewClient({
         <Banner
           variant="problem"
           action={
-            <Link
-              href={`/host/t/${tournament.id}/disputes/${openDisputes[0].dispute.id}`}
-            >
-              <Button variant="danger" size="compact">
+            <Button asChild variant="danger" size="compact">
+              <Link
+                href={`/host/t/${tournament.id}/disputes/${openDisputes[0].dispute.id}`}
+              >
                 Resolve dispute
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           }
         >
           {openDisputes.length === 1
@@ -371,17 +397,6 @@ export function TournamentViewClient({
         >
           Final confirmed. Review the payout.
         </Banner>
-      )}
-
-      {/* Demo controls (only when DEMO_MODE=true) */}
-      {demoMode && isHostOwner && (
-        <DemoControlsPanel
-          tournamentId={tournament.id}
-          state={tournament.state}
-          paidCount={data.paidCount}
-          matches={matches}
-          onUpdated={() => loadTournament(true)}
-        />
       )}
 
       {/* Player action panels */}
@@ -425,39 +440,42 @@ export function TournamentViewClient({
           </div>
         )}
 
+      {demoFirst && demoPanel}
+
       {/* Navigation Tabs (`Bracket`, `Players`, `Activity`, `Ledger`) */}
       <div className="space-y-4">
         <div
           role="tablist"
           aria-label="Tournament views"
-          className="flex flex-wrap gap-1 border-b border-line pb-2"
+          className="-mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
+          onKeyDown={(event) => {
+            const keys = tabItems.map((item) => item.key);
+            const index = keys.indexOf(tab);
+            let next = index;
+            if (event.key === "ArrowRight") next = (index + 1) % keys.length;
+            else if (event.key === "ArrowLeft") next = (index - 1 + keys.length) % keys.length;
+            else if (event.key === "Home") next = 0;
+            else if (event.key === "End") next = keys.length - 1;
+            else return;
+            event.preventDefault();
+            setActiveTab(keys[next]);
+            document.getElementById(`tab-${keys[next]}`)?.focus();
+          }}
         >
-          {[
-            { key: "bracket", label: "Bracket" },
-            {
-              key: "players",
-              label: `Players (${data.paidCount}/${tournament.slots})`,
-            },
-            {
-              key: "activity",
-              label: `Activity (${activity.length})`,
-            },
-            { key: "ledger", label: "Ledger" },
-          ].map((item) => (
+          {tabItems.map((item) => (
             <button
               key={item.key}
+              id={`tab-${item.key}`}
               type="button"
               role="tab"
               aria-selected={tab === item.key}
-              onClick={() =>
-                setActiveTab(
-                  item.key as "bracket" | "players" | "activity" | "ledger"
-                )
-              }
-              className={`rounded-[var(--radius-control)] px-3.5 py-2 type-small font-medium transition-colors ${
+              aria-controls="tournament-tabpanel"
+              tabIndex={tab === item.key ? 0 : -1}
+              onClick={() => setActiveTab(item.key)}
+              className={`min-h-11 shrink-0 border-b-2 px-3.5 type-small font-medium transition-colors duration-[var(--dur-fast)] ${
                 tab === item.key
-                  ? "bg-pitch text-paper"
-                  : "text-ink-2 hover:bg-paper"
+                  ? "border-pitch text-pitch-dark"
+                  : "border-transparent text-ink-2 hover:text-ink"
               }`}
             >
               {item.label}
@@ -465,61 +483,68 @@ export function TournamentViewClient({
           ))}
         </div>
 
-        {tab === "bracket" && (
-          <BracketView
-            tournamentId={tournament.id}
-            matches={matches}
-            isHost={isHostOwner}
-          />
-        )}
+        <div
+          id="tournament-tabpanel"
+          role="tabpanel"
+          aria-labelledby={`tab-${tab}`}
+          className="space-y-4"
+        >
+          {tab === "bracket" && (
+            <BracketView
+              tournamentId={tournament.id}
+              matches={matches}
+              isHost={isHostOwner}
+            />
+          )}
 
-        {tab === "players" && (
-          <Panel className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="type-h3">
-                Registered players ({data.paidCount} of {tournament.slots} paid)
-              </h2>
-            </div>
-            {entries.filter((e) => e.status === "paid").length === 0 ? (
-              <p className="type-small text-muted py-4">
-                No paid players yet. Share the tournament link so players can join.
-              </p>
-            ) : (
-              <ul className="divide-y divide-line">
-                {entries
-                  .filter((e) => e.status === "paid")
-                  .map((entry, idx) => (
-                    <li
-                      key={entry.id}
-                      className="flex items-center justify-between py-2.5 type-small"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-pitch-tint type-caption font-semibold text-pitch-dark tabular-nums">
-                          {idx + 1}
-                        </span>
-                        <span className="font-medium text-ink">
-                          {entry.gamertag}
-                        </span>
-                        {entry.simulated && (
-                          <span className="rounded-full border border-line bg-chalk px-2 py-0.5 type-caption text-muted">
-                            simulated demo player
+          {tab === "players" && (
+            <Panel className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="type-h3">
+                  Registered players ({filledEntries.length} of {tournament.slots} slots filled, {realPaidCount} paid)
+                </h2>
+              </div>
+              {filledEntries.length === 0 ? (
+                <p className="type-small text-muted py-4">
+                  No registered players yet. Share the tournament link so players can join.
+                </p>
+              ) : (
+                <ul className="divide-y divide-line">
+                  {filledEntries.map((entry, idx) => (
+                      <li
+                        key={entry.id}
+                        className="flex flex-wrap items-center justify-between gap-2 py-2.5 type-small"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-pitch-tint type-caption font-semibold text-pitch-dark tabular-nums">
+                            {idx + 1}
                           </span>
-                        )}
-                      </div>
-                      <span className="rounded-full bg-pitch-tint px-2.5 py-0.5 type-caption font-medium text-pitch-dark">
-                        Paid {formatUsd(tournament.entryFeeCents)}
-                      </span>
-                    </li>
-                  ))}
-              </ul>
-            )}
-          </Panel>
-        )}
+                          <span className="font-medium text-ink">
+                            {entry.gamertag}
+                          </span>
+                          {entry.simulated && (
+                            <span className="rounded-full border border-line bg-chalk px-2 py-0.5 type-caption text-muted">
+                              simulated demo player
+                            </span>
+                          )}
+                        </div>
+                        <span className="rounded-full bg-pitch-tint px-2.5 py-0.5 type-caption font-medium text-pitch-dark">
+                          {entry.simulated ? "No payment (demo)" : `Paid ${formatUsd(tournament.entryFeeCents)}`}
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </Panel>
+          )}
 
-        {tab === "activity" && <ActivityLog items={activity} />}
+          {tab === "activity" && <ActivityLog items={activity} />}
 
-        {tab === "ledger" && <LedgerTable ledger={ledger} />}
+          {tab === "ledger" && <LedgerTable ledger={ledger} />}
+        </div>
       </div>
+
+      {!demoFirst && demoPanel}
     </main>
   );
 }
