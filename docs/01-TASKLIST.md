@@ -154,7 +154,7 @@ Build against `06` and `07`. Each task includes empty, loading, and error states
 
 - [x] **T-110 Edge-case suite** [CORE]. needs T-064. Implement every row of `08 §Edge-case matrix`.
 - [ ] **T-111 Sandbox integration tests** [CORE]. needs T-110. `test:sandbox` covers order, capture, refund, payout against the real sandbox.
-- [ ] **T-112 Playwright smoke** [CORE]. needs T-103. Host creates, bots fill, results submit, payout confirms, using demo mode.
+- [x] **T-112 Playwright smoke** [CORE]. needs T-103. Host creates, bots fill, results submit, payout confirms, using demo mode.
 - [ ] **T-113 README and architecture notes** [CORE]. needs T-103. Per `09 §README outline`, including the AI tools used.
 - [ ] **T-114 Real organizer quotes** [CORE]. Human task: collect 2 to 3 quotes from tournament organizers or players; add to README and demo script.
 - [ ] **T-115 Repo audit** [CORE]. needs T-113. No secrets in history, licence visible, setup instructions verified on a clean clone.
@@ -213,3 +213,4 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 - `T-080`–`T-091` — App shell, landing, host dashboard, create page, tournament page with bracket/players/activity/ledger, join and pay, player match panel, dispute view, payout review dialog. Built and compiled (`build:check`); hosted visual pass still pending under T-092.
 - `T-100`–`T-102` — `scripts/make-screenshots.ts` (output in `public/demo-screenshots`), bot fill and submit under `src/server/demo/`, `/api/demo/*` routes gated by `DEMO_MODE`, and a seed script.
 - `T-110` — All 36 `08 §Edge-case matrix` IDs are referenced by tests (map in `docs/10-RELEASE.md`). Left unticked on purpose: T-031, T-092, T-103, T-111, T-112+ (need real services or hosted verification).
+- `T-112` — `npm run test:e2e` passes at 360px and 1280px against local in-memory providers (checkout return, dispute ruling, payout dialog, receipt, balanced ledger). Not yet run against hosted services.
