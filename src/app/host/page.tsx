@@ -73,9 +73,9 @@ export default function HostDashboardPage() {
             Manage registration, settle disputes, and confirm winner payouts.
           </p>
         </div>
-        <Link href="/host/new">
-          <Button variant="primary">New tournament</Button>
-        </Link>
+        <Button asChild variant="primary">
+          <Link href="/host/new">New tournament</Link>
+        </Button>
       </div>
 
       {error && <Banner variant="problem">{error}</Banner>}
@@ -89,9 +89,9 @@ export default function HostDashboardPage() {
         <EmptyState
           message="No tournaments yet. Create your first one."
           action={
-            <Link href="/host/new">
-              <Button variant="primary">New tournament</Button>
-            </Link>
+            <Button asChild variant="primary">
+              <Link href="/host/new">New tournament</Link>
+            </Button>
           }
         />
       ) : (
@@ -127,11 +127,9 @@ export default function HostDashboardPage() {
                     </span>
                   </div>
                 </div>
-                <Link href={`/t/${t.id}`}>
-                  <Button variant="secondary" size="compact">
-                    Open tournament
-                  </Button>
-                </Link>
+                <Button asChild variant="secondary" size="compact">
+                  <Link href={`/t/${t.id}`}>View</Link>
+                </Button>
               </div>
             </Panel>
           ))}

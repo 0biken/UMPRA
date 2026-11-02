@@ -28,9 +28,9 @@ export default function GlobalError({
           <Button variant="primary" onClick={() => reset()}>
             Try again
           </Button>
-          <Link href="/">
-            <Button variant="secondary">Back to home</Button>
-          </Link>
+          <Button asChild variant="secondary">
+            <Link href="/">Back to home</Link>
+          </Button>
         </div>
       </Panel>
     </main>

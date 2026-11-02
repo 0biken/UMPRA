@@ -114,7 +114,7 @@ Build on shadcn/ui primitives (Radix), restyled with the tokens. Show every stat
 
 | Component | Spec |
 |-----------|------|
-| Button | Heights 44 (default), 36 (compact). Variants: primary (pitch), secondary (paper, line-strong border, ink text), danger (card-red, white text), ghost. Radius control. Disabled at 50% opacity with `aria-disabled`. Loading shows an inline spinner and keeps width |
+| Button | Heights 44 (default), 36 (compact). Variants: primary (pitch), secondary (paper, line-strong border, ink text), danger (card-red, white text), ghost. Radius control. A link that looks like a button uses `<Button asChild><Link>`, never a button inside a link. Disabled at 50% opacity with `aria-disabled`. Loading shows an inline spinner and keeps width |
 | Input, Select, Textarea | Height 44, paper, 1px line-strong border, radius field, visible label above, helper text below, error state with red border, red-ink message and icon |
 | StatePill | Pill radius, 28px tall, icon plus label, colours from the state table in `06` |
 | Panel | Paper, 1px line border, radius panel, no shadow |

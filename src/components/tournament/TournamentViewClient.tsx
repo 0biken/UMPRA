@@ -200,9 +200,9 @@ export function TournamentViewClient({
         <Banner variant="problem">
           {error ?? "Tournament could not be found."}
         </Banner>
-        <Link href="/play">
-          <Button variant="secondary">Browse open tournaments</Button>
-        </Link>
+        <Button asChild variant="secondary">
+          <Link href="/play">Browse open tournaments</Link>
+        </Button>
       </main>
     );
   }
@@ -311,13 +311,13 @@ export function TournamentViewClient({
               </div>
             </div>
             {isHostOwner && (
-              <Link href={`/host/t/${tournament.id}/payout`}>
-                <Button variant="primary">
+              <Button asChild variant="primary">
+                <Link href={`/host/t/${tournament.id}/payout`}>
                   {tournament.state === "paid"
                     ? "View payout receipt"
                     : "Review and confirm payout"}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
           </Panel>
         )}
@@ -364,11 +364,9 @@ export function TournamentViewClient({
         <Banner
           variant="attention"
           action={
-            <Link href={`/host/t/${tournament.id}/payout`}>
-              <Button variant="primary" size="compact">
-                Review payout
-              </Button>
-            </Link>
+            <Button asChild variant="primary" size="compact">
+              <Link href={`/host/t/${tournament.id}/payout`}>Review payout</Link>
+            </Button>
           }
         >
           Final confirmed. Review the payout.
@@ -417,11 +415,11 @@ export function TournamentViewClient({
                     {formatUsd(tournament.entryFeeCents)} entry fee and claim a slot.
                   </p>
                 </div>
-                <Link href={`/login?next=/t/${tournament.id}`}>
-                  <Button variant="primary">
+                <Button asChild variant="primary">
+                  <Link href={`/login?next=/t/${tournament.id}`}>
                     Join for {formatUsd(tournament.entryFeeCents)}
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </Panel>
             )}
           </div>

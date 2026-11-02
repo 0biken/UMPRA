@@ -99,16 +99,17 @@ export default function PlayBrowsePage() {
                     </span>
                   </div>
                 </div>
-                <Link href={`/t/${t.id}`}>
-                  <Button
-                    variant={t.state === "open" ? "primary" : "secondary"}
-                    size="compact"
-                  >
+                <Button
+                  asChild
+                  variant={t.state === "open" ? "primary" : "secondary"}
+                  size="compact"
+                >
+                  <Link href={`/t/${t.id}`}>
                     {t.state === "open"
                       ? `Join for ${formatUsd(t.entryFeeCents)}`
                       : "View bracket"}
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </Panel>
           ))}

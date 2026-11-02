@@ -10,25 +10,26 @@ How the audit was run: `node scripts/local-check.mjs dev` (in-memory database, f
 |---------|-----|
 | Landing page was 510px wide at 360px; headline and body text were cut off. The bracket SVG (`min-w-[460px]`) stretched its grid column | `min-w-0` on the hero grid children. The bracket now scrolls inside its own container |
 | 11 em-dashes in visible strings (page title, score and id placeholders, styleguide options) | Replaced with a hyphen or a colon |
+| Signed-in header was 201px tall at 360px, flashed signed-out links on load, and showed "Open tournaments" to hosts and signed-out visitors (a dead end: `/play` is player-only) | Phase 1: one 56px row plus a 46px scrolling nav strip below `md`, nav inline from `md`. The session comes from the server layout, so the right links render on first paint. Nav is role-aware: hosts get My tournaments and New tournament, players get Open tournaments, signed-out visitors get none |
+| `<a><button>` nesting on every link-styled button (double tab stop, invalid HTML) | Phase 1: `Button` has `asChild`; every Link-wrapped button now uses it |
+| Header buttons and logo under 44px | Phase 1: 44px |
+| Landing hero: 3-line headline, caption under the CTAs, boxed lifecycle cards | Phase 1: 2-line headline ("Umpire the bracket. Pay the winners."), 18-word subtext, caption moved into the sandbox panel, lifecycle is an open row of five steps. The mini bracket no longer scrolls at 1280px |
+| Host dashboard link "Open tournament" only viewed the page | Phase 1: renamed "View" |
 
 ## Open findings
 
 ### T-080 App shell
 
-- The signed-in header is 201px tall at 360px because the nav wraps onto three rows. That is a quarter of the screen on every page.
-- The header shows the signed-out links (Sign in, Register) for a moment before the session resolves, then swaps. Render a neutral header until the session is known.
-- Tap targets under 44px: nav links and Sign in / Register buttons (36px), the Umpra logo link (24px), compact buttons, tournament tabs (36px).
-- Links wrap buttons (`<a><button>`): the header, the host dashboard ("New tournament", "Open tournament") and the payout page ("Back to tournament"). It is invalid HTML and gives two tab stops per control.
-- "Open tournaments" is shown to signed-out visitors and sends them to the login page.
+- Remaining: compact buttons (36px) and the tournament tabs (36px) are still under 44px. Cleared in T-092.
 
 ### T-081 Landing
 
-- Fixed overflow only. The hero still needs the design pass (headline is five lines at 360px; body is seven).
+- Done in Phase 1 (see the fixed list). Remaining: when a user is already signed in, the landing page still offers the "Try as host / player" buttons.
 
 ### T-082 Host dashboard
 
 - The meta line uses middle dots ("Table Football · $5.00 entry · 0 of 8 players paid"); `07` says no middle-dot strings.
-- The "Open tournament" link only views the page. Next to the real "Open registration" action that is confusing. Rename it ("View").
+- The empty dashboard shows two "New tournament" buttons (page header and empty state). Keep only the empty-state action.
 
 ### T-084 Tournament page
 
@@ -56,7 +57,6 @@ How the audit was run: `node scripts/local-check.mjs dev` (in-memory database, f
 - At 360px the table scrolls sideways and the Amount column, the most important figure, is off screen. Use stacked recipient cards on mobile.
 - "1 disputes resolved by you": plural bug. The match and dispute counts also appear twice on the page.
 - The raw status "drafted" is shown to users. Use plain words ("Ready to send").
-- Two "Back to tournament" controls.
 - "Confirm payout" is well below the fold at 360px.
 - The confirm dialog, progress and receipt states were not exercised.
 

@@ -12,11 +12,9 @@ export default function CreateTournamentPage() {
             Describe your tournament in plain words or fill the form directly.
           </p>
         </div>
-        <Link href="/host">
-          <Button variant="secondary" size="compact">
-            Back to my tournaments
-          </Button>
-        </Link>
+        <Button asChild variant="secondary" size="compact">
+          <Link href="/host">Back to my tournaments</Link>
+        </Button>
       </div>
 
       <CreateTournamentFlow />

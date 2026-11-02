@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +11,8 @@ export interface ButtonProps
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  /** Render the single child (for example a Link) with button styling, instead of a nested button. */
+  asChild?: boolean;
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -35,6 +38,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant = "primary",
       size = "default",
       loading = false,
+      asChild = false,
       disabled,
       children,
       ...props
@@ -42,18 +46,26 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const isDisabled = Boolean(disabled || loading);
+    const classes = cn(
+      "relative inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] transition-colors duration-[var(--dur-fast)] select-none cursor-pointer",
+      variantClasses[variant],
+      sizeClasses[size],
+      isDisabled && "opacity-50 pointer-events-none cursor-not-allowed",
+      className
+    );
+    if (asChild) {
+      return (
+        <Slot ref={ref as React.Ref<HTMLElement>} className={classes} {...props}>
+          {children}
+        </Slot>
+      );
+    }
     return (
       <button
         ref={ref}
         disabled={isDisabled}
         aria-disabled={isDisabled}
-        className={cn(
-          "relative inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] transition-colors duration-[var(--dur-fast)] select-none cursor-pointer",
-          variantClasses[variant],
-          sizeClasses[size],
-          isDisabled && "opacity-50 pointer-events-none cursor-not-allowed",
-          className
-        )}
+        className={classes}
         {...props}
       >
         <span

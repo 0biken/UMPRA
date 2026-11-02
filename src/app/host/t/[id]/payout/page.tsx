@@ -132,9 +132,9 @@ export default function PayoutReviewPage() {
     return (
       <main className="mx-auto max-w-[920px] px-4 py-6 sm:px-6 lg:px-8 space-y-4">
         <Banner variant="problem">{error}</Banner>
-        <Link href={`/t/${tournamentId}`}>
-          <Button variant="secondary">Back to tournament</Button>
-        </Link>
+        <Button asChild variant="secondary">
+          <Link href={`/t/${tournamentId}`}>Back to tournament</Link>
+        </Button>
       </main>
     );
   }
@@ -168,11 +168,9 @@ export default function PayoutReviewPage() {
           </p>
         </div>
 
-        <Link href={`/t/${tournamentId}`}>
-          <Button variant="secondary" size="compact">
-            Back to tournament
-          </Button>
-        </Link>
+        <Button asChild variant="secondary" size="compact">
+          <Link href={`/t/${tournamentId}`}>Back to tournament</Link>
+        </Button>
       </div>
 
       {error && <Banner variant="problem">{error}</Banner>}

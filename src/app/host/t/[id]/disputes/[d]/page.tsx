@@ -139,9 +139,9 @@ export default function ResolveDisputePage() {
     return (
       <main className="mx-auto max-w-[1120px] px-4 py-6 sm:px-6 lg:px-8 space-y-4">
         <Banner variant="problem">{error ?? "Dispute not found."}</Banner>
-        <Link href={`/t/${tournamentId}`}>
-          <Button variant="secondary">Back to tournament</Button>
-        </Link>
+        <Button asChild variant="secondary">
+          <Link href={`/t/${tournamentId}`}>Back to tournament</Link>
+        </Button>
       </main>
     );
   }
@@ -170,11 +170,9 @@ export default function ResolveDisputePage() {
             {tournamentTitle} · Round {match.round} · Reason: {reasonLabel}
           </p>
         </div>
-        <Link href={`/t/${tournamentId}`}>
-          <Button variant="secondary" size="compact">
-            Back to bracket
-          </Button>
-        </Link>
+        <Button asChild variant="secondary" size="compact">
+          <Link href={`/t/${tournamentId}`}>Back to bracket</Link>
+        </Button>
       </div>
 
       {resolvedBanner && <Banner variant="info">{resolvedBanner}</Banner>}

@@ -32,7 +32,7 @@ export function MiniBracketHero() {
       <div className="overflow-x-auto">
         <svg
           viewBox="0 0 540 164"
-          className="h-[154px] w-full min-w-[460px]"
+          className="h-[154px] w-full min-w-[400px]"
           role="img"
           aria-label="Semi-final matches connecting into the final match"
         >
