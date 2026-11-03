@@ -28,7 +28,10 @@ const variantClasses: Record<ButtonVariant, string> = {
 
 const sizeClasses: Record<ButtonSize, string> = {
   default: "h-[44px] px-4 text-[16px] leading-[24px] font-medium",
-  compact: "h-[36px] px-3 text-[14px] leading-[20px] font-medium",
+  // 36px to look compact (07), with an invisible 4px extension above and below so the
+  // tap target is 44px (06). The root is `relative`, which anchors the pseudo-element.
+  compact:
+    "h-[36px] px-3 text-[14px] leading-[20px] font-medium before:absolute before:inset-x-0 before:-inset-y-1 before:content-['']",
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

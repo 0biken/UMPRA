@@ -219,7 +219,8 @@ export function BracketView({
             onClick={() =>
               setMobileView(tab.key as "r1" | "r2" | "r3" | "full")
             }
-            className={`rounded-[var(--radius-control)] border px-3 py-1.5 type-small font-medium transition-colors ${
+            aria-pressed={mobileView === tab.key}
+            className={`min-h-11 rounded-[var(--radius-control)] border px-3 type-small font-medium transition-colors ${
               mobileView === tab.key
                 ? "border-pitch bg-pitch text-paper"
                 : "border-line bg-paper text-ink-2"

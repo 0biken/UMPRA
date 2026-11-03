@@ -114,8 +114,8 @@ Build on shadcn/ui primitives (Radix), restyled with the tokens. Show every stat
 
 | Component | Spec |
 |-----------|------|
-| Button | Heights 44 (default), 36 (compact). Variants: primary (pitch), secondary (paper, line-strong border, ink text), danger (card-red, white text), ghost. Radius control. A link that looks like a button uses `<Button asChild><Link>`, never a button inside a link. Disabled at 50% opacity with `aria-disabled`. Loading shows an inline spinner and keeps width |
-| Input, Select, Textarea | Height 44, paper, 1px line-strong border, radius field, visible label above, helper text below, error state with red border, red-ink message and icon |
+| Button | Heights 44 (default), 36 (compact; an invisible 4px extension above and below keeps the tap target at 44). Variants: primary (pitch), secondary (paper, line-strong border, ink text), danger (card-red, white text), ghost. Radius control. A link that looks like a button uses `<Button asChild><Link>`, never a button inside a link. Disabled at 50% opacity with `aria-disabled`. Loading shows an inline spinner and keeps width |
+| Input, Select, Textarea | Height 44, paper, 1px muted border (line-strong is 1.8:1 on paper, under the 3:1 a field boundary needs), radius field, visible label above, helper text below, error state with red border, red-ink message and icon |
 | StatePill | Pill radius, 28px tall, icon plus label, colours from the state table in `06` |
 | Panel | Paper, 1px line border, radius panel, no shadow |
 | PrizePlate | The key number. Ink background, chalk text, display type for the amount, a yellow top rule (3px) and the caption "Held by Umpra until the host confirms the payout." Beneath: 8 slot markers (filled pitch for paid, pitch outline for simulated demo players, chalk outline for open slots) and "$X of $40 collected". Explain that demo players add no money. |

@@ -33,7 +33,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           aria-invalid={Boolean(error)}
           aria-describedby={error || helperText ? msgId : undefined}
           className={cn(
-            "h-[44px] w-full rounded-[var(--radius-field)] bg-paper px-3 type-body text-ink border border-line-strong placeholder:text-muted/80 transition-colors duration-[var(--dur-fast)]",
+            "h-[44px] w-full rounded-[var(--radius-field)] bg-paper px-3 type-body text-ink border border-muted placeholder:text-muted/80 transition-colors duration-[var(--dur-fast)]",
             error && "border-card-red bg-red-tint/20",
             className
           )}
@@ -80,7 +80,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           aria-invalid={Boolean(error)}
           aria-describedby={error || helperText ? msgId : undefined}
           className={cn(
-            "min-h-[96px] w-full rounded-[var(--radius-field)] bg-paper p-3 type-body text-ink border border-line-strong placeholder:text-muted/80 transition-colors duration-[var(--dur-fast)]",
+            "min-h-[96px] w-full rounded-[var(--radius-field)] bg-paper p-3 type-body text-ink border border-muted placeholder:text-muted/80 transition-colors duration-[var(--dur-fast)]",
             error && "border-card-red bg-red-tint/20",
             className
           )}
@@ -127,7 +127,7 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectProps>(
           aria-invalid={Boolean(error)}
           aria-describedby={error || helperText ? msgId : undefined}
           className={cn(
-            "h-[44px] w-full rounded-[var(--radius-field)] bg-paper px-3 type-body text-ink border border-line-strong transition-colors duration-[var(--dur-fast)]",
+            "h-[44px] w-full rounded-[var(--radius-field)] bg-paper px-3 type-body text-ink border border-muted transition-colors duration-[var(--dur-fast)]",
             error && "border-card-red bg-red-tint/20",
             className
           )}
