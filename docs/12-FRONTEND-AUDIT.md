@@ -15,6 +15,11 @@ How the audit was run: `node scripts/local-check.mjs dev` (in-memory database, f
 | Header buttons and logo under 44px | Phase 1: 44px |
 | Landing hero: 3-line headline, caption under the CTAs, boxed lifecycle cards | Phase 1: 2-line headline ("Umpire the bracket. Pay the winners."), 18-word subtext, caption moved into the sandbox panel, lifecycle is an open row of five steps. The mini bracket no longer scrolls at 1280px |
 | Host dashboard link "Open tournament" only viewed the page | Phase 1: renamed "View" |
+| Tournament page: demo controls above the bracket, plate showing 8 filled markers next to "$5 of $40", wrong-tense "Terms locked" text, middle-dot meta line, wrapping tab row, "Semi-finals" versus "Semifinals" | Phase 2: demo controls follow the tabs once play starts (above them while the field is filling); plate markers are paid (filled), simulated (ring) and open (faint ring) with a caption and screen-reader label; meta line has no dots; tabs are one scrollable 44px row with roving tabindex and arrow, Home and End keys; round names match the server ("Quarterfinals", "Semifinals"); the stray leading space in `getRoundName(3)` is gone |
+| Players tab said "8 of 8 paid" and "Paid $5.00" for demo players | Phase 2: heading counts filled slots and real payments separately; demo players show "No payment (demo)" |
+| Ledger: Amount column off screen at 360px, raw status words ("captured"), "-$0.00" | Phase 2: stacked rows with the amount visible below `sm`, table from `sm`; plain status labels; "$0.00"; totals as a list |
+| Activity: icons were the only sign of who acted | Phase 2: screen-reader prefix ("Umpra:" or "Person:") on each entry |
+| Winner-line draw animation not verified | Phase 2: observed firing on a live confirmation (`umpra-bracket-draw`, 0.45s, dash length matches the path). Reduced motion not toggled live; the global CSS rule disables the animation |
 
 ## Open findings
 
@@ -31,19 +36,9 @@ How the audit was run: `node scripts/local-check.mjs dev` (in-memory database, f
 - The meta line uses middle dots ("Table Football · $5.00 entry · 0 of 8 players paid"); `07` says no middle-dot strings.
 - The empty dashboard shows two "New tournament" buttons (page header and empty state). Keep only the empty-state action.
 
-### T-084 Tournament page
+### T-084, T-085, T-090, T-091 Tournament page, bracket, Activity, Ledger
 
-- The solo-judge demo controls sit above the bracket and push it below the fold. The bracket should lead; demo controls go below or into a collapsible panel.
-- The prize plate shows all 8 slot markers filled when demo players fill the slots, next to "$5 of $40 collected". Decide what the markers mean when bots fill slots (paid versus taken) and make the plate consistent.
-- A draft tournament says "Terms locked once registration opens". The doc string is "Terms lock once you open registration."
-- Meta line uses middle dots (same as T-082).
-- At 360px the tab row wraps and "Ledger" lands on a second row. Make the tabs a single scrollable row or shorten the labels.
-- The UI says "Semi-finals" and the activity feed says "Semifinals". Pick one.
-
-### T-085 Bracket
-
-- Works: the round selector, one round at a time, and the full SVG view (the confirmed winner's path draws in pitch green and scrolls inside its own container). Match buttons have excellent labels.
-- Not verified: the winner-line draw animation itself, and the reduced-motion fallback.
+- Done in Phase 2 (see the fixed list). Remaining: the mobile round selector wraps to two rows at 360px; tabs are not yet checked for the "Final being checked" and cancelled or refunded states; Activity shows times without dates.
 
 ### T-088 Dispute view
 
@@ -71,9 +66,8 @@ How the audit was run: `node scripts/local-check.mjs dev` (in-memory database, f
 ## Not yet audited
 
 - `/host/new` (describe and form paths, parsed preview, review card)
+- 768px and 1280px widths on every page except the landing and tournament pages
 - Player match panel and screenshot upload (T-087)
-- Activity and Ledger tab visuals
-- 768px and 1280px widths
 - Payout dialog, result and receipt states
 - Keyboard order and focus return in dialogs
 - `/styleguide` against the current components
