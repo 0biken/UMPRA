@@ -247,7 +247,7 @@ export function MiniBracketHero() {
               fill="var(--color-chalk)"
               fontSize="11"
             >
-              1st · Kemi
+              1st: Kemi
             </text>
             <text
               x="12"

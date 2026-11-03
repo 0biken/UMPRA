@@ -21,6 +21,44 @@ interface PayoutReviewResponse {
   trail: { confirmedMatchesCount: number; resolvedDisputesCount: number };
 }
 
+const PAYOUT_STATUS_LABELS: Record<string, string> = {
+  drafted: "Ready to send",
+  approved: "Sending",
+  submitted: "Sending",
+  pending: "Sending",
+  processing: "Sending",
+  succeeded: "Paid",
+  failed: "Failed",
+  unclaimed: "Unclaimed",
+  returned: "Returned",
+};
+
+const IN_FLIGHT = new Set(["approved", "submitted", "pending", "processing"]);
+
+function placeLabel(place: number): string {
+  return place === 1 ? "Champion" : place === 2 ? "Runner-up" : `Place ${place}`;
+}
+
+function plural(count: number, one: string, many: string): string {
+  return `${count} ${count === 1 ? one : many}`;
+}
+
+function PayoutStatusBadge({ status }: { status: string }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 type-caption font-medium ${
+        status === "succeeded"
+          ? "bg-pitch-tint text-pitch-dark"
+          : status === "failed" || status === "unclaimed" || status === "returned"
+            ? "bg-red-tint text-red-ink"
+            : "bg-yellow-tint text-yellow-ink"
+      }`}
+    >
+      {PAYOUT_STATUS_LABELS[status] ?? status}
+    </span>
+  );
+}
+
 export default function PayoutReviewPage() {
   const params = useParams<{ id: string }>();
   const tournamentId = params.id;
@@ -152,6 +190,12 @@ export default function PayoutReviewPage() {
     (r) => r.status === "failed" || r.status === "unclaimed"
   );
   const batchId = recipients.find((r) => r.paypalBatchId)?.paypalBatchId ?? null;
+  const inFlight = recipients.some((r) => IN_FLIGHT.has(r.status));
+  const trailText = `${evidenceSummary.confirmedMatchesCount} of ${evidenceSummary.totalMatchesCount} matches confirmed. ${
+    evidenceSummary.resolvedDisputesCount > 0
+      ? `${plural(evidenceSummary.resolvedDisputesCount, "dispute", "disputes")} resolved by you.`
+      : "No disputes."
+  }`;
 
   return (
     <main className="mx-auto max-w-[920px] px-4 py-6 sm:px-6 lg:px-8 space-y-6">
@@ -161,11 +205,7 @@ export default function PayoutReviewPage() {
             <h1 className="type-h1">Payout review</h1>
             <StatePill state={tournament.state} />
           </div>
-          <p className="type-small text-muted">
-            {tournament.title} · {evidenceSummary.confirmedMatchesCount} matches
-            confirmed, {evidenceSummary.resolvedDisputesCount} disputes resolved
-            by you
-          </p>
+          <p className="type-small text-muted">{tournament.title}</p>
         </div>
 
         <Button asChild variant="secondary" size="compact">
@@ -178,11 +218,17 @@ export default function PayoutReviewPage() {
       {/* Success receipt banner (`06 §Copy rules`) */}
       {allSucceeded && (
         <Banner variant="info">
-          Paid!{" "}
+          Paid.{" "}
           {recipients
             .map((r) => `${formatUsd(r.amountCents)} to ${r.gamertag}`)
             .join(", ")}
           .
+        </Banner>
+      )}
+
+      {inFlight && failedItems.length === 0 && (
+        <Banner variant="attention">
+          Sending to PayPal. This page updates as each payout completes.
         </Banner>
       )}
 
@@ -226,41 +272,49 @@ export default function PayoutReviewPage() {
           )}
         </div>
 
-        <div className="overflow-x-auto rounded-[var(--radius-field)] border border-line">
-          <table className="w-full min-w-[520px] border-collapse text-left type-small">
+        {/* Phones: one row per recipient, amount always visible */}
+        <ul className="divide-y divide-line rounded-[var(--radius-field)] border border-line sm:hidden">
+          {recipients.map((r) => (
+            <li key={r.id} className="flex items-start justify-between gap-3 px-4 py-3">
+              <div className="min-w-0 space-y-1">
+                <div className="type-small font-semibold text-ink">
+                  {placeLabel(r.place)}: {r.gamertag}
+                </div>
+                <div className="break-all font-mono type-caption text-muted">{r.paypalEmail}</div>
+                <PayoutStatusBadge status={r.status} />
+              </div>
+              <div className="shrink-0 type-body font-semibold tabular-nums text-ink">
+                {formatUsd(r.amountCents)}
+              </div>
+            </li>
+          ))}
+          <li className="flex items-center justify-between gap-3 bg-chalk px-4 py-3 type-small font-semibold">
+            <span className="text-ink">Total (equals the prize pool)</span>
+            <span className="tabular-nums text-pitch-dark">{formatUsd(data.totalPayoutCents)}</span>
+          </li>
+        </ul>
+
+        {/* Tablet and up */}
+        <div className="hidden overflow-x-auto rounded-[var(--radius-field)] border border-line sm:block">
+          <table className="w-full border-collapse text-left type-small">
+            <caption className="sr-only">Payout recipients and amounts</caption>
             <thead>
               <tr className="border-b border-line bg-chalk text-ink-2">
-                <th className="px-4 py-3 font-semibold">Place</th>
-                <th className="px-4 py-3 font-semibold">Winner</th>
-                <th className="px-4 py-3 font-semibold">PayPal recipient</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 text-right font-semibold">Amount</th>
+                <th scope="col" className="px-4 py-3 font-semibold">Place</th>
+                <th scope="col" className="px-4 py-3 font-semibold">Winner</th>
+                <th scope="col" className="px-4 py-3 font-semibold">PayPal recipient</th>
+                <th scope="col" className="px-4 py-3 font-semibold">Status</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">Amount</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {recipients.map((r) => (
                 <tr key={r.id} className="bg-paper">
-                  <td className="px-4 py-3 font-semibold text-ink">
-                    {r.place === 1 ? "1st (Champion)" : "2nd (Runner-up)"}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-ink">
-                    {r.gamertag}
-                  </td>
-                  <td className="px-4 py-3 font-mono type-caption text-muted">
-                    {r.paypalEmail}
-                  </td>
+                  <td className="px-4 py-3 font-semibold text-ink">{placeLabel(r.place)}</td>
+                  <td className="px-4 py-3 font-medium text-ink">{r.gamertag}</td>
+                  <td className="px-4 py-3 font-mono type-caption text-muted">{r.paypalEmail}</td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 type-caption font-medium ${
-                        r.status === "succeeded"
-                          ? "bg-pitch-tint text-pitch-dark"
-                          : r.status === "failed" || r.status === "unclaimed"
-                            ? "bg-red-tint text-red-ink"
-                            : "bg-yellow-tint text-yellow-ink"
-                      }`}
-                    >
-                      {r.status}
-                    </span>
+                    <PayoutStatusBadge status={r.status} />
                   </td>
                   <td className="px-4 py-3 text-right font-semibold tabular-nums text-ink">
                     {formatUsd(r.amountCents)}
@@ -271,9 +325,9 @@ export default function PayoutReviewPage() {
             <tfoot className="border-t-2 border-line-strong bg-chalk font-semibold">
               <tr>
                 <td colSpan={4} className="px-4 py-3 text-ink">
-                  Total payout (matches held prize pool)
+                  Total (equals the prize pool)
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-pitch">
+                <td className="px-4 py-3 text-right tabular-nums text-pitch-dark">
                   {formatUsd(data.totalPayoutCents)}
                 </td>
               </tr>
@@ -281,32 +335,24 @@ export default function PayoutReviewPage() {
           </table>
         </div>
 
-        {/* Evidence trail summary */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-field)] border border-line bg-chalk p-3.5 type-small">
-          <div className="flex items-center gap-2 text-ink">
-            <ShieldCheck className="h-5 w-5 text-pitch" strokeWidth={1.75} />
-            <span>
-              {evidenceSummary.confirmedMatchesCount} of{" "}
-              {evidenceSummary.totalMatchesCount} matches verified
-              {evidenceSummary.finalMatchScore
-                ? ` · Final score ${evidenceSummary.finalMatchScore}`
-                : ""}
-              {evidenceSummary.resolvedDisputesCount > 0
-                ? ` · ${evidenceSummary.resolvedDisputesCount} dispute resolved by host`
-                : " · 0 unresolved disputes"}
-            </span>
+        {/* Evidence trail and the one decision on this screen */}
+        <div className="space-y-3 rounded-[var(--radius-field)] border border-line bg-chalk p-3.5 type-small">
+          <div className="flex items-start gap-2 text-ink">
+            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-pitch" strokeWidth={1.75} />
+            <span>{trailText}</span>
           </div>
 
           {allDrafted && (
             <Button
               variant="primary"
+              className="w-full sm:w-auto"
               onClick={() => setConfirmDialogOpen(true)}
             >
               Confirm payout
             </Button>
           )}
           {allSucceeded && (
-            <span className="inline-flex items-center gap-1.5 font-semibold text-pitch">
+            <span className="inline-flex items-center gap-1.5 font-semibold text-pitch-dark">
               <CheckCircle2 className="h-4 w-4" strokeWidth={1.75} />
               <span>All payouts completed</span>
             </span>
@@ -318,7 +364,7 @@ export default function PayoutReviewPage() {
       <Dialog
         open={confirmDialogOpen}
         onClose={() => setConfirmDialogOpen(false)}
-        title={`This sends ${formatUsd(data.totalPayoutCents)} to ${recipients.length} PayPal accounts. Payments cannot be recalled.`}
+        title={`This sends ${formatUsd(data.totalPayoutCents)} to ${plural(recipients.length, "PayPal account", "PayPal accounts")}. Payments cannot be recalled.`}
         description="Once you confirm, Umpra submits the payout batch to PayPal Payouts immediately."
         actions={
           <>
@@ -343,10 +389,13 @@ export default function PayoutReviewPage() {
           {recipients.map((r) => (
             <li
               key={r.id}
-              className="flex items-center justify-between py-2"
+              className="flex items-start justify-between gap-3 py-2"
             >
-              <span className="text-ink">
-                {r.place === 1 ? "1st" : "2nd"} · {r.gamertag} ({r.paypalEmail})
+              <span className="min-w-0 text-ink">
+                {placeLabel(r.place)}: {r.gamertag}
+                <span className="block break-all font-mono type-caption text-muted">
+                  {r.paypalEmail}
+                </span>
               </span>
               <span className="font-semibold tabular-nums text-ink">
                 {formatUsd(r.amountCents)}

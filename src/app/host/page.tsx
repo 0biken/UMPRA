@@ -73,9 +73,12 @@ export default function HostDashboardPage() {
             Manage registration, settle disputes, and confirm winner payouts.
           </p>
         </div>
-        <Button asChild variant="primary">
-          <Link href="/host/new">New tournament</Link>
-        </Button>
+        {/* The empty state carries its own action, so only one button shows at a time. */}
+        {!loading && items.length > 0 && (
+          <Button asChild variant="primary">
+            <Link href="/host/new">New tournament</Link>
+          </Button>
+        )}
       </div>
 
       {error && <Banner variant="problem">{error}</Banner>}

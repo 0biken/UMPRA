@@ -60,8 +60,9 @@ export default function ResolveDisputePage() {
     null
   );
 
-  const loadData = React.useCallback(async () => {
-    setLoading(true);
+  // `silent` reloads keep the page on screen (after a ruling) instead of showing skeletons.
+  const loadData = React.useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const res = await fetch(`/api/tournaments/${tournamentId}`);
       const data = await res.json();
@@ -82,9 +83,11 @@ export default function ResolveDisputePage() {
         );
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load dispute.");
+      if (!silent) {
+        setError(err instanceof Error ? err.message : "Could not load dispute.");
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [tournamentId, disputeId]);
 
@@ -113,7 +116,7 @@ export default function ResolveDisputePage() {
       const msg = `Resolved. Umpra has moved ${winnerTag} to the next round.`;
       setResolvedBanner(msg);
       pushToast(`Ruled for ${winnerTag}`, "info");
-      await loadData();
+      await loadData(true);
       router.refresh();
     } catch {
       setError("Network error while resolving dispute.");
@@ -166,8 +169,10 @@ export default function ResolveDisputePage() {
               }
             />
           </div>
-          <p className="type-small text-muted">
-            {tournamentTitle} · Round {match.round} · Reason: {reasonLabel}
+          <p className="type-small flex flex-wrap gap-x-4 gap-y-0.5 text-muted">
+            <span>{tournamentTitle}</span>
+            <span>{match.round === 1 ? "Quarterfinal" : match.round === 2 ? "Semifinal" : "Final"}</span>
+            <span>Reason: {reasonLabel}</span>
           </p>
         </div>
         <Button asChild variant="secondary" size="compact">
@@ -181,7 +186,7 @@ export default function ResolveDisputePage() {
       <Panel className="space-y-2 border-card-red bg-red-tint">
         <div className="flex items-center gap-2 type-h3 text-red-ink">
           <Flag className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-          <span>Umpra summary · {reasonLabel}</span>
+          <span>Umpra summary: {reasonLabel}</span>
         </div>
         <p className="type-body text-red-ink max-w-[65ch]">
           {match.dispute.summary ??
@@ -208,7 +213,8 @@ export default function ResolveDisputePage() {
       />
 
       {/* Host decision controls */}
-      {match.dispute.status === "open" && match.playerAId && match.playerBId && (
+      {/* Hide the ruling as soon as it succeeds, not when the slower reload returns. */}
+      {match.dispute.status === "open" && !resolvedBanner && match.playerAId && match.playerBId && (
         <Panel className="space-y-4 border-line-strong">
           <h2 className="type-h3">Make the official ruling</h2>
           <div className="max-w-lg">

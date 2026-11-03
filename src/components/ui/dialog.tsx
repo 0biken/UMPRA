@@ -87,15 +87,34 @@ export function Dialog({
   children,
 }: ManagedDialogProps) {
   const descriptionId = React.useId();
+  // Opened from state rather than a Dialog.Trigger, so Radix has nothing to return focus to.
+  // Remember the element that opened it and give focus back on close (06: return focus on close).
+  const openerRef = React.useRef<HTMLElement | null>(null);
+  // Layout effect: runs before Radix's focus effect moves focus into the dialog.
+  React.useLayoutEffect(() => {
+    if (open && document.activeElement instanceof HTMLElement) {
+      openerRef.current = document.activeElement;
+    }
+  }, [open]);
   const handleOpenChange = (next: boolean) => {
     onOpenChange?.(next);
     if (!next) onClose?.();
+  };
+  const restoreFocus = (event: Event) => {
+    const opener = openerRef.current;
+    if (opener && opener.isConnected) {
+      event.preventDefault();
+      opener.focus();
+    }
   };
 
   if (title !== undefined || description !== undefined || actions !== undefined) {
     return (
       <DialogPrimitive.Root open={open} onOpenChange={handleOpenChange}>
-        <DialogContent aria-describedby={description ? descriptionId : undefined}>
+        <DialogContent
+          aria-describedby={description ? descriptionId : undefined}
+          onCloseAutoFocus={restoreFocus}
+        >
           {title && <DialogTitle>{title}</DialogTitle>}
           {description && <DialogDescription id={descriptionId}>{description}</DialogDescription>}
           {children && <div className="mt-3">{children}</div>}

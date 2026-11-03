@@ -32,7 +32,8 @@ export function CreateTournamentFlow() {
   const [winnerPercent, setWinnerPercent] = React.useState("70");
   const [runnerUpPercent, setRunnerUpPercent] = React.useState("30");
 
-  const [submitting, setSubmitting] = React.useState(false);
+  /** Which button is working: "open" or "draft". Only that button spins. */
+  const [submitting, setSubmitting] = React.useState<"open" | "draft" | null>(null);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
 
   async function handleParse(e?: React.FormEvent) {
@@ -115,7 +116,7 @@ export function CreateTournamentFlow() {
   }, [title, game, feeValid, splitValid, entryFeeCents, payoutSplitBps]);
 
   async function handleCreate(openImmediately: boolean) {
-    setSubmitting(true);
+    setSubmitting(openImmediately ? "open" : "draft");
     setSubmitError(null);
     try {
       const res = await fetch("/api/tournaments", {
@@ -149,9 +150,24 @@ export function CreateTournamentFlow() {
     } catch {
       setSubmitError("Network error while creating tournament. Try again.");
     } finally {
-      setSubmitting(false);
+      setSubmitting(null);
     }
   }
+
+  // Say why the create buttons are off instead of leaving them silently disabled.
+  const blockedReason =
+    title.trim().length < 3
+      ? "Add a tournament title of at least 3 characters."
+      : !feeValid
+        ? "Set an entry fee between $1 and $20."
+        : !splitValid
+          ? "Make 1st and 2nd place add up to 100%."
+          : null;
+
+  const modes: Array<{ key: "describe" | "form"; label: string }> = [
+    { key: "describe", label: "Describe in plain words" },
+    { key: "form", label: "Fill the form" },
+  ];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
@@ -159,34 +175,33 @@ export function CreateTournamentFlow() {
         <div
           role="tablist"
           aria-label="Tournament setup mode"
-          className="inline-flex rounded-[var(--radius-control)] border border-line bg-paper p-1"
+          className="inline-flex max-w-full rounded-[var(--radius-control)] border border-line bg-paper p-1"
+          onKeyDown={(event) => {
+            if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+            event.preventDefault();
+            const next = activeTab === "describe" ? "form" : "describe";
+            setActiveTab(next);
+            document.getElementById(`setup-tab-${next}`)?.focus();
+          }}
         >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "describe"}
-            onClick={() => setActiveTab("describe")}
-            className={`rounded-[var(--radius-field)] px-3.5 py-2 type-small font-medium transition-colors ${
-              activeTab === "describe"
-                ? "bg-pitch text-paper"
-                : "text-ink-2 hover:bg-chalk"
-            }`}
-          >
-            Describe in plain words
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "form"}
-            onClick={() => setActiveTab("form")}
-            className={`rounded-[var(--radius-field)] px-3.5 py-2 type-small font-medium transition-colors ${
-              activeTab === "form"
-                ? "bg-pitch text-paper"
-                : "text-ink-2 hover:bg-chalk"
-            }`}
-          >
-            Fill the form
-          </button>
+          {modes.map((mode) => (
+            <button
+              key={mode.key}
+              id={`setup-tab-${mode.key}`}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === mode.key}
+              tabIndex={activeTab === mode.key ? 0 : -1}
+              onClick={() => setActiveTab(mode.key)}
+              className={`min-h-11 rounded-[var(--radius-field)] px-3.5 type-small font-medium transition-colors duration-[var(--dur-fast)] ${
+                activeTab === mode.key
+                  ? "bg-pitch text-paper"
+                  : "text-ink-2 hover:bg-chalk"
+              }`}
+            >
+              {mode.label}
+            </button>
+          ))}
         </div>
 
         {activeTab === "describe" && (
@@ -312,7 +327,7 @@ export function CreateTournamentFlow() {
           <div className="flex items-center justify-between py-2.5">
             <dt className="text-muted">Format</dt>
             <dd className="font-medium text-ink">
-              8 players · Single elimination
+              8 players, single elimination
             </dd>
           </div>
           <div className="flex items-center justify-between py-2.5">
@@ -348,20 +363,23 @@ export function CreateTournamentFlow() {
         <div className="flex flex-col gap-2.5 pt-2">
           <Button
             variant="primary"
-            loading={submitting}
-            disabled={!feeValid || !splitValid || title.trim().length < 3}
+            loading={submitting === "open"}
+            disabled={blockedReason !== null || submitting !== null}
             onClick={() => handleCreate(true)}
           >
             Open registration
           </Button>
           <Button
             variant="secondary"
-            loading={submitting}
-            disabled={!feeValid || !splitValid || title.trim().length < 3}
+            loading={submitting === "draft"}
+            disabled={blockedReason !== null || submitting !== null}
             onClick={() => handleCreate(false)}
           >
             Save draft
           </Button>
+          {blockedReason && (
+            <p className="type-caption text-muted">{blockedReason}</p>
+          )}
         </div>
       </Panel>
     </div>

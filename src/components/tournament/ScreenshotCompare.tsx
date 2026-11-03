@@ -14,6 +14,31 @@ export interface CompareSubmissionSide {
   confidence?: number | null;
 }
 
+const EXTRACTION_LABELS: Record<string, string> = {
+  ok: "Screenshot read",
+  pending: "Reading screenshot",
+  malformed: "Couldn't read",
+  unreadable: "Couldn't read",
+};
+
+/** Screenshot with a line-coloured placeholder until the image has loaded. */
+function ShotImage({ src, alt }: { src: string; alt: string }) {
+  const [loaded, setLoaded] = React.useState(false);
+  return (
+    <div className={loaded ? "bg-chalk" : "animate-pulse bg-line"}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+        className="h-48 w-full object-contain"
+      />
+    </div>
+  );
+}
+
 export function ScreenshotCompare({
   sideA,
   sideB,
@@ -39,9 +64,7 @@ export function ScreenshotCompare({
             <h3 className="type-h3 text-ink">{side.gamertag}</h3>
             <span className="rounded-full border border-line bg-chalk px-2.5 py-0.5 type-caption text-muted">
               {side.submissionId
-                ? side.extractionStatus === "ok"
-                  ? "Screenshot read"
-                  : side.extractionStatus ?? "Submitted"
+                ? (EXTRACTION_LABELS[side.extractionStatus ?? ""] ?? "Submitted")
                 : "Not submitted"}
             </span>
           </div>
@@ -54,13 +77,7 @@ export function ScreenshotCompare({
               }
               className="group relative block w-full overflow-hidden rounded-[var(--radius-field)] border border-line bg-chalk text-left"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imgSrc}
-                alt={`${side.gamertag}'s submitted screenshot`}
-                loading="lazy"
-                className="h-48 w-full object-contain"
-              />
+              <ShotImage src={imgSrc} alt={`${side.gamertag}'s submitted screenshot`} />
               <span className="block border-t border-line bg-paper px-2.5 py-1 type-caption text-muted group-hover:text-ink">
                 Tap to enlarge screenshot
               </span>

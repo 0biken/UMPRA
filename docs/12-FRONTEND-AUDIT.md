@@ -23,6 +23,11 @@ How the audit was run: `node scripts/local-check.mjs dev` (in-memory database, f
 | Uploader: preview stayed after a successful upload (its button then did nothing); the same file could not be picked again after an error; no cancel; hidden input reachable by Tab | Phase 3: preview cleared on success; input reset; Cancel added; "Preparing your screenshot..." while resizing; hidden input out of the tab order |
 | Middle-dot meta lines on `/play` and the host dashboard | Phase 3: plain spaced items |
 | Phase 0 note "demo submit buttons expose no accessible name" | Retracted: the inspection tool does not read text inside the button's `<span>`; the rendered `<button><span>label</span></button>` is named correctly by browsers |
+| Payout review: Amount off screen at 360px, "1 disputes", raw "drafted", counts shown twice, Confirm below the fold, "Paid!", "1 PayPal accounts" for a single recipient, no message while sending | Phase 4: stacked recipient rows below `sm` with amounts visible; plain statuses ("Ready to send", "Sending", "Paid"); one trail line with correct plurals; Confirm inside the first screen at 360px and full width; receipt uses the `06` string "Paid. $X to ..."; pluralized dialog title; a "Sending to PayPal" banner while items are in flight. Money calls and the `allDrafted` gate are unchanged |
+| Dialogs did not return focus on close (focus fell to the page body) | Phase 4: the shared `Dialog` records the opener in a layout effect and restores focus in `onCloseAutoFocus` |
+| Dispute view: reload after a ruling blanked the page into skeletons; decision buttons stayed clickable until the slow reload returned; middle dots and "Round 1" in the header; raw extraction status chips; blank box while screenshots load | Phase 4: silent reload, ruling controls hidden as soon as the ruling succeeds, plain header with the round name, plain chip labels, line-coloured placeholder until the image loads. The "Needs host" pill seen in Phase 0 was the slow reload, not a bug: it updates once the reload returns |
+| Host dashboard showed two "New tournament" buttons when empty | Phase 4: header button only once tournaments exist |
+| Create flow: mode tabs about 36px with no arrow keys; create buttons silently disabled; both buttons spun on either click; middle dot | Phase 4: 44px tabs with roving tabindex and arrow keys; a line says why the buttons are off; only the pressed button spins; plain review text |
 | Ledger: Amount column off screen at 360px, raw status words ("captured"), "-$0.00" | Phase 2: stacked rows with the amount visible below `sm`, table from `sm`; plain status labels; "$0.00"; totals as a list |
 | Activity: icons were the only sign of who acted | Phase 2: screen-reader prefix ("Umpra:" or "Person:") on each entry |
 | Winner-line draw animation not verified | Phase 2: observed firing on a live confirmation (`umpra-bracket-draw`, 0.45s, dash length matches the path). Reduced motion not toggled live; the global CSS rule disables the animation |
@@ -37,27 +42,13 @@ How the audit was run: `node scripts/local-check.mjs dev` (in-memory database, f
 
 - Done in Phase 1 (see the fixed list). Remaining: when a user is already signed in, the landing page still offers the "Try as host / player" buttons.
 
-### T-082 Host dashboard
-
-- The empty dashboard shows two "New tournament" buttons (page header and empty state). Keep only the empty-state action.
-
 ### T-084, T-085, T-090, T-091 Tournament page, bracket, Activity, Ledger
 
 - Done in Phase 2 (see the fixed list). Remaining: the mobile round selector wraps to two rows at 360px; tabs are not yet checked for the "Final being checked" and cancelled or refunded states; Activity shows times without dates.
 
-### T-088 Dispute view
+### T-082, T-083, T-088, T-089 Host flows
 
-- Works: reason, summary, both screenshots with alt text, extracted data, two 44px decision buttons.
-- After resolving, the page still shows the "Needs host" pill and no confirmation text. `06` promises "Resolved. Umpra has moved <winner> to the next round."
-- The screenshot area is a blank chalk box until the lazy image loads. Use the `Skeleton` component.
-
-### T-089 Payout review and confirm
-
-- At 360px the table scrolls sideways and the Amount column, the most important figure, is off screen. Use stacked recipient cards on mobile.
-- "1 disputes resolved by you": plural bug. The match and dispute counts also appear twice on the page.
-- The raw status "drafted" is shown to users. Use plain words ("Ready to send").
-- "Confirm payout" is well below the fold at 360px.
-- The confirm dialog, progress and receipt states were not exercised.
+- Done in Phase 4 (see the fixed list). Remaining: the "Sending to PayPal" banner was not observed live because the local fake PayPal settles instantly; the partial-failure and retry states were not exercised; the dispute pill shows "In play" after a ruling (there is no "Resolved" pill state); `Dialog` does not set `aria-modal` (Radix hides the rest of the page instead).
 
 ### Server
 
@@ -69,10 +60,9 @@ How the audit was run: `node scripts/local-check.mjs dev` (in-memory database, f
 
 ## Not yet audited
 
-- `/host/new` (describe and form paths, parsed preview, review card)
-- 768px and 1280px widths on every page except the landing and tournament pages
-- Payout dialog, result and receipt states
-- Keyboard order and focus return in dialogs
+- The describe path of `/host/new` (only the form path was walked)
+- 768px and 1280px widths on the dashboard, create and dispute pages
+- Keyboard order across whole pages (focus return in dialogs is fixed)
 - `/styleguide` against the current components
 
 ## Left as is
