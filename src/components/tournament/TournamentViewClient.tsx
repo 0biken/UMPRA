@@ -418,7 +418,8 @@ export function TournamentViewClient({
               <JoinAndPayPanel
                 tournamentId={tournament.id}
                 entryFeeCents={tournament.entryFeeCents}
-                defaultGamertag={currentUser.displayName}
+                // Display names can carry a suffix such as "(Demo Player)" that no scoreboard shows.
+                defaultGamertag={currentUser.displayName.replace(/\s*\([^)]*\)\s*$/, "")}
                 defaultPaypalEmail={currentUser.paypalEmail ?? ""}
               />
             ) : (

@@ -77,6 +77,7 @@ export function ScreenshotUploader({
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const [uploading, setUploading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [preparing, setPreparing] = React.useState(false);
 
   React.useEffect(() => {
     return () => {
@@ -86,6 +87,8 @@ export function ScreenshotUploader({
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const rawFile = e.target.files?.[0];
+    // Reset so choosing the same file again (after an error) still fires onChange.
+    e.target.value = "";
     if (!rawFile) return;
 
     setError(null);
@@ -98,7 +101,10 @@ export function ScreenshotUploader({
       return;
     }
 
-    const resized = await resizeImageClientSide(rawFile, 1600);
+    setPreparing(true);
+    const resized = await resizeImageClientSide(rawFile, 1600).finally(() =>
+      setPreparing(false)
+    );
     if (resized.size > 5 * 1024 * 1024) {
       setError(
         "Screenshot exceeds the 5 MB limit. Resize or compress the image and try again."
@@ -109,6 +115,12 @@ export function ScreenshotUploader({
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setSelectedFile(resized);
     setPreviewUrl(URL.createObjectURL(resized));
+  }
+
+  function clearSelection() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setSelectedFile(null);
   }
 
   async function handleUpload() {
@@ -133,7 +145,7 @@ export function ScreenshotUploader({
       }
 
       pushToast("Screenshot uploaded", "info");
-      setSelectedFile(null);
+      clearSelection();
       onUploaded?.();
     } catch {
       setError("Network error while uploading screenshot. Try again.");
@@ -150,10 +162,19 @@ export function ScreenshotUploader({
         accept="image/png,image/jpeg,image/webp"
         onChange={handleFileSelect}
         className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
         id={`screenshot-input-${matchId}`}
       />
 
-      {previewUrl ? (
+      {preparing ? (
+        <div
+          role="status"
+          className="rounded-[var(--radius-field)] border border-line bg-chalk p-4 type-small text-ink-2"
+        >
+          Preparing your screenshot...
+        </div>
+      ) : previewUrl ? (
         <div className="space-y-3 rounded-[var(--radius-field)] border border-line bg-chalk p-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -171,11 +192,13 @@ export function ScreenshotUploader({
             </Button>
             <Button
               variant="secondary"
-              size="compact"
               disabled={uploading}
               onClick={() => inputRef.current?.click()}
             >
-              Choose another image
+              Choose another
+            </Button>
+            <Button variant="ghost" disabled={uploading} onClick={clearSelection}>
+              Cancel
             </Button>
           </div>
         </div>
@@ -183,14 +206,11 @@ export function ScreenshotUploader({
         <div className="rounded-[var(--radius-field)] border border-dashed border-line-strong bg-chalk p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-0.5">
-              <label
-                htmlFor={`screenshot-input-${matchId}`}
-                className="type-small font-medium text-ink cursor-pointer"
-              >
+              <p className="type-small font-medium text-ink">
                 {existingSubmissionId
                   ? "Replace your result screenshot"
                   : "Upload your result screenshot"}
-              </label>
+              </p>
               <p className="type-caption text-muted">
                 PNG, JPEG, or WebP up to 5 MB. Must show the final score and both player names.
               </p>

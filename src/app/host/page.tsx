@@ -111,9 +111,12 @@ export default function HostDashboardPage() {
                   </Link>
                   <StatePill state={t.state} />
                 </div>
-                <p className="type-small text-muted">
-                  {t.game} · {formatUsd(t.entryFeeCents)} entry · {t.paidCount} of{" "}
-                  {t.slots} players paid
+                <p className="type-small flex flex-wrap gap-x-4 gap-y-0.5 text-muted">
+                  <span>{t.game}</span>
+                  <span>{formatUsd(t.entryFeeCents)} entry</span>
+                  <span>
+                    {t.paidCount} of {t.slots} slots filled
+                  </span>
                 </p>
               </div>
 

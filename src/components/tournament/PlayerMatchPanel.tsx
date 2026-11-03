@@ -6,6 +6,12 @@ import { Banner } from "@/components/ui/banner";
 import { ScreenshotUploader } from "./ScreenshotUploader";
 import type { BracketMatchItem } from "./BracketView";
 
+function roundLabel(round: number): string {
+  if (round === 1) return "Quarterfinal";
+  if (round === 2) return "Semifinal";
+  return "Final";
+}
+
 export function PlayerMatchPanel({
   playerId,
   gamertag,
@@ -17,15 +23,18 @@ export function PlayerMatchPanel({
   matches: BracketMatchItem[];
   onRefresh?: () => void;
 }) {
-  // Find active or most recent match for this player
   const playerMatches = matches
     .filter((m) => m.playerAId === playerId || m.playerBId === playerId)
     .sort((a, b) => b.round - a.round);
 
+  // The match that needs the player now, else the next one they are slotted into,
+  // else the last one they played.
   const currentMatch =
     playerMatches.find(
       (m) => m.status === "awaiting_results" || m.status === "disputed"
-    ) ?? playerMatches[0];
+    ) ??
+    playerMatches.find((m) => m.status === "waiting") ??
+    playerMatches[0];
 
   if (!currentMatch) {
     return (
@@ -40,70 +49,76 @@ export function PlayerMatchPanel({
 
   const isPlayerA = currentMatch.playerAId === playerId;
   const opponentTag = isPlayerA
-    ? (currentMatch.playerBGamertag ?? "Opponent")
-    : (currentMatch.playerAGamertag ?? "Opponent");
+    ? currentMatch.playerBGamertag
+    : currentMatch.playerAGamertag;
 
-  const roundLabel =
-    currentMatch.round === 1
-      ? "Round 1 (Quarterfinal)"
-      : currentMatch.round === 2
-        ? "Round 2 (Semifinal)"
-        : "Final";
+  const myScore = isPlayerA ? currentMatch.scoreA : currentMatch.scoreB;
+  const theirScore = isPlayerA ? currentMatch.scoreB : currentMatch.scoreA;
+  const hasScore = myScore !== null && theirScore !== null;
+  const iWon = currentMatch.winnerId === playerId;
 
   const mySub = currentMatch.submissions.find((s) => s.playerId === playerId);
   const oppSub = currentMatch.submissions.find((s) => s.playerId !== playerId);
 
-  const canReplace =
-    currentMatch.status === "awaiting_results";
-
-  const score = currentMatch.scoreA !== null && currentMatch.scoreB !== null ? ` ${currentMatch.scoreA}-${currentMatch.scoreB}` : "";
-
   return (
     <Panel className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <div className="type-caption text-muted">Your match</div>
-          <h2 className="type-h3">
-            {roundLabel}: {gamertag} vs {opponentTag}
-          </h2>
-        </div>
+      <div>
+        <div className="type-caption text-muted">Your match</div>
+        <h2 className="type-h3">
+          {roundLabel(currentMatch.round)}: {gamertag} vs {opponentTag ?? "to be decided"}
+        </h2>
       </div>
 
-      {currentMatch.status === "confirmed" && (
-        <Banner
-          variant={currentMatch.winnerId === playerId ? "info" : "attention"}
-        >
-          {currentMatch.winnerId === playerId
-            ? `Confirmed: you won${score}.`
-            : `Confirmed: ${currentMatch.winnerGamertag} won${score}.`}
+      {currentMatch.status === "waiting" && (
+        <Banner variant="info">
+          You&apos;re through. Your next opponent is decided when the other{" "}
+          {roundLabel(currentMatch.round - 1).toLowerCase()} is confirmed.
         </Banner>
       )}
 
+      {currentMatch.status === "confirmed" &&
+        (iWon ? (
+          <Banner variant="info">
+            {currentMatch.round === 3
+              ? `You won the tournament${hasScore ? ` ${myScore}-${theirScore}` : ""}. Your prize is paid after the host confirms the payout.`
+              : `Confirmed: you won${hasScore ? ` ${myScore}-${theirScore}` : ""}.`}
+          </Banner>
+        ) : (
+          <Banner variant="attention">
+            Confirmed: {currentMatch.winnerGamertag} won
+            {hasScore ? ` ${theirScore}-${myScore}` : ""}.{" "}
+            {currentMatch.round === 3
+              ? "You finished runner-up. Your prize is paid after the host confirms the payout."
+              : "You're out of the tournament. Thanks for playing."}
+          </Banner>
+        ))}
+
       {currentMatch.status === "disputed" && (
         <Banner variant="problem">
-          Under host review.{" "}
-          {currentMatch.dispute?.summary ??
-            "The host is reviewing both submitted screenshots."}
+          Under host review. The screenshots didn&apos;t agree, so the host will decide this match.
         </Banner>
       )}
 
       {currentMatch.status === "awaiting_results" && (
         <>
+          {!mySub && (
+            <p className="type-small text-ink-2">
+              Play your match, then upload a screenshot of the final score.
+            </p>
+          )}
           {mySub && !oppSub && (
             <Banner variant="attention">
-              Waiting for {opponentTag} to submit their screenshot.
+              Waiting for {opponentTag ?? "your opponent"} to submit their screenshot.
             </Banner>
           )}
           {mySub && oppSub && (
-            <Banner variant="info">
-              Umpra is checking both screenshots.
-            </Banner>
+            <Banner variant="info">Umpra is checking both screenshots.</Banner>
           )}
 
           <ScreenshotUploader
             matchId={currentMatch.id}
             existingSubmissionId={mySub?.id ?? null}
-            canReplace={canReplace}
+            canReplace
             onUploaded={onRefresh}
           />
         </>

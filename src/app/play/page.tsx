@@ -23,7 +23,32 @@ interface BrowseTournamentItem {
   maxPrizePoolCents: number;
 }
 
+/** Messages for PayPal returns that land here instead of on a tournament page. */
+const PAYMENT_BANNERS: Record<string, { variant: "attention" | "problem"; text: string }> = {
+  cancelled: {
+    variant: "attention",
+    text: "Payment cancelled. Your slot is free again. Join again whenever you're ready.",
+  },
+  failed: {
+    variant: "problem",
+    text: "We couldn't confirm that payment with PayPal. Check your PayPal activity before you try again, and tell the host if you were charged.",
+  },
+  missing_entry: {
+    variant: "problem",
+    text: "That PayPal link didn't match an entry. Open the tournament and join again.",
+  },
+};
+
 export default function PlayBrowsePage() {
+  const [paymentBanner, setPaymentBanner] = React.useState<
+    (typeof PAYMENT_BANNERS)[string] | null
+  >(null);
+
+  React.useEffect(() => {
+    const key = new URLSearchParams(window.location.search).get("payment");
+    if (key && PAYMENT_BANNERS[key]) setPaymentBanner(PAYMENT_BANNERS[key]);
+  }, []);
+
   const [items, setItems] = React.useState<BrowseTournamentItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -57,6 +82,9 @@ export default function PlayBrowsePage() {
         </p>
       </div>
 
+      {paymentBanner && (
+        <Banner variant={paymentBanner.variant}>{paymentBanner.text}</Banner>
+      )}
       {error && <Banner variant="problem">{error}</Banner>}
 
       {loading ? (
@@ -83,9 +111,12 @@ export default function PlayBrowsePage() {
                   </Link>
                   <StatePill state={t.state} />
                 </div>
-                <p className="type-small text-muted">
-                  {t.game} · {formatUsd(t.entryFeeCents)} entry · {t.paidCount} of{" "}
-                  {t.slots} slots filled
+                <p className="type-small flex flex-wrap gap-x-4 gap-y-0.5 text-muted">
+                  <span>{t.game}</span>
+                  <span>{formatUsd(t.entryFeeCents)} entry</span>
+                  <span>
+                    {t.paidCount} of {t.slots} slots filled
+                  </span>
                 </p>
               </div>
 
