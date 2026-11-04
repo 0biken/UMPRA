@@ -61,7 +61,7 @@ export function ScreenshotCompare({
       <div className="flex flex-col justify-between rounded-[var(--radius-panel)] border border-line bg-paper p-4 space-y-3">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="type-h3 text-ink">{side.gamertag}</h3>
+            <h2 className="type-h3 text-ink">{side.gamertag}</h2>
             <span className="rounded-full border border-line bg-chalk px-2.5 py-0.5 type-caption text-muted">
               {side.submissionId
                 ? (EXTRACTION_LABELS[side.extractionStatus ?? ""] ?? "Submitted")

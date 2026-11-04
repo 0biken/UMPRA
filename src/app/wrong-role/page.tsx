@@ -62,7 +62,7 @@ function WrongRoleContent() {
           </Button>
           <Link
             href={current === "host" ? "/host" : "/play"}
-            className="text-center type-small font-medium text-pitch hover:underline py-2"
+            className="inline-flex min-h-11 items-center justify-center type-small font-medium text-pitch hover:underline"
           >
             Back to {current} home
           </Link>

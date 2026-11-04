@@ -108,7 +108,7 @@ export default function HostDashboardPage() {
                 <div className="flex flex-wrap items-center gap-2.5">
                   <Link
                     href={`/t/${t.id}`}
-                    className="type-h3 text-ink hover:text-pitch transition-colors"
+                    className="-my-2.5 inline-block py-2.5 type-h3 text-ink hover:text-pitch transition-colors"
                   >
                     {t.title}
                   </Link>

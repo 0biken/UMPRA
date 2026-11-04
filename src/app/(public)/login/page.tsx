@@ -55,7 +55,7 @@ function LoginForm() {
       <div className="flex items-center gap-2">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 type-h3 text-ink"
+          className="inline-flex min-h-11 items-center gap-2 type-h3 text-ink"
         >
           <Flag className="h-5 w-5 text-pitch" strokeWidth={1.75} />
           <span>Umpra</span>

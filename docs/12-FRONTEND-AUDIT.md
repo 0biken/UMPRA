@@ -1,4 +1,4 @@
-# 12 - Frontend audit (Phase 0)
+# 12 - Frontend audit (Phases 0 to 5)
 
 Audit of the M8 screens as they stood after commit `f747762`, walked at 360px in the browser against a local demo server. Findings are grouped by the tasklist item that should fix them. Phases 1 to 5 of the frontend plan work from this list.
 
@@ -30,13 +30,16 @@ How the audit was run: `node scripts/local-check.mjs dev` (in-memory database, f
 | Create flow: mode tabs about 36px with no arrow keys; create buttons silently disabled; both buttons spun on either click; middle dot | Phase 4: 44px tabs with roving tabindex and arrow keys; a line says why the buttons are off; only the pressed button spins; plain review text |
 | Ledger: Amount column off screen at 360px, raw status words ("captured"), "-$0.00" | Phase 2: stacked rows with the amount visible below `sm`, table from `sm`; plain status labels; "$0.00"; totals as a list |
 | Activity: icons were the only sign of who acted | Phase 2: screen-reader prefix ("Umpra:" or "Person:") on each entry |
-| Winner-line draw animation not verified | Phase 2: observed firing on a live confirmation (`umpra-bracket-draw`, 0.45s, dash length matches the path). Reduced motion not toggled live; the global CSS rule disables the animation |
+| Winner-line draw animation not verified | Phase 2: observed firing on a live confirmation (`umpra-bracket-draw`, 0.45s, dash length matches the path). Phase 5: with `prefers-reduced-motion: reduce` the landing bracket's 0.45s transitions drop to none |
+| Compact buttons 36px tall; bracket round chips about 36px with no pressed state; input borders 1.8:1 on paper (under the 3:1 a field boundary needs) | Phase 5: compact buttons keep their 36px look with an invisible 4px extension above and below (44px target); round chips `min-h-11` with `aria-pressed`; inputs use a `muted` border (5.4:1). Doc `07` updated |
+| Logo link on sign-in and register 24px tall; tournament title links on `/host` and `/play` 24px; "Back to host home" on `/wrong-role` 36px; dispute page jumped from h1 to h3 | Phase 5: all 44px (title links use padding with a matching negative margin, so the card layout is unchanged); screenshot names are h2 |
+| Audit coverage | Phase 5: a Playwright DOM check over 15 pages, 3 roles and 360, 768 and 1280px (overflow, 44px targets, names, labels, alt text, duplicate ids, heading order, tabindex, `lang`) reports 0 issues. A Tab walk over 7 pages at 360px found every stop visible with a focus ring, in reading order. The only extra stop is Next.js's dev overlay, which is not in production builds |
 
 ## Open findings
 
 ### T-080 App shell
 
-- Remaining: compact buttons (36px) and the tournament tabs (36px) are still under 44px. Cleared in T-092.
+- Cleared in Phase 5 (T-092): compact buttons and tabs now have 44px targets.
 
 ### T-081 Landing
 
@@ -61,9 +64,9 @@ How the audit was run: `node scripts/local-check.mjs dev` (in-memory database, f
 ## Not yet audited
 
 - The describe path of `/host/new` (only the form path was walked)
-- 768px and 1280px widths on the dashboard, create and dispute pages
-- Keyboard order across whole pages (focus return in dialogs is fixed)
 - `/styleguide` against the current components
+- Screen readers (NVDA, VoiceOver): the checks above are DOM and keyboard only
+- The pitch slot marker on the prize plate is 2.8:1 on ink, just under 3:1. Left as designed because the paid count is also given in text and in the screen-reader label
 
 ## Left as is
 
