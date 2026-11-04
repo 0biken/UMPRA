@@ -25,7 +25,7 @@ import {
 import { issueRefundForPayment } from "@/server/paypal/refunds";
 import { getPayPalClient, type PayPalClient } from "@/server/paypal/client";
 import { getStorageProvider, type StorageProvider } from "@/server/storage";
-import { getVisionProvider } from "./vision/anthropic";
+import { getVisionProvider } from "./vision/gemini";
 import {
   runVisionExtractionWithRetries,
   type VisionProvider,

@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { generateGeminiText } from "./gemini";
 import { z } from "zod";
 import { env } from "@/server/env";
 import { TOURNAMENT_PARSE_SYSTEM_PROMPT } from "./prompts";
@@ -48,7 +48,7 @@ export interface ParsedTournamentPreview {
 
 /**
  * Deterministic rule-based parser for plain-language tournament descriptions.
- * Used as fallback when Anthropic API is not configured or returns malformed output,
+ * Used as fallback when Gemini API is not configured or returns malformed output,
  * and ensures fast, deterministic unit/integration testing.
  */
 export function parseTournamentDescriptionRuleBased(
@@ -323,23 +323,16 @@ export async function parseTournamentPrompt(
 
   const callFn =
     options?.llmCall ??
-    (env.ANTHROPIC_API_KEY &&
-    !env.ANTHROPIC_API_KEY.includes("placeholder") &&
-    !env.ANTHROPIC_API_KEY.startsWith("test-") &&
+    (env.GEMINI_API_KEY &&
+    !env.GEMINI_API_KEY.includes("placeholder") &&
+    !env.GEMINI_API_KEY.startsWith("test-") &&
     process.env.NODE_ENV !== "test"
       ? async (input: string) => {
-          const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
-          const response = await client.messages.create({
-            model: env.VISION_MODEL,
-            max_tokens: 400,
-            temperature: 0,
+          return generateGeminiText({
             system: TOURNAMENT_PARSE_SYSTEM_PROMPT,
-            messages: [{ role: "user", content: input }],
+            text: input,
+            json: true,
           });
-          return response.content
-            .filter((b): b is Anthropic.TextBlock => b.type === "text")
-            .map((b) => b.text)
-            .join("\n");
         }
       : undefined);
 

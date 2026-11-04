@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { databaseConfigSchema, storageConfigSchema, aiConfigSchema } from "./setup-config";
 
 const booleanString = (defaultValue: boolean) =>
   z
@@ -11,7 +12,7 @@ const booleanString = (defaultValue: boolean) =>
 
 export const envSchema = z.object({
   APP_URL: z.string().url("APP_URL must be a valid URL"),
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  ...databaseConfigSchema.shape,
   SESSION_SECRET: z
     .string()
     .min(32, "SESSION_SECRET must be at least 32 characters"),
@@ -24,17 +25,9 @@ export const envSchema = z.object({
   PAYPAL_WEBHOOK_ID: z.string().min(1, "PAYPAL_WEBHOOK_ID is required"),
   PAYPAL_WEBHOOK_VERIFY: booleanString(true),
 
-  ANTHROPIC_API_KEY: z.string().min(1, "ANTHROPIC_API_KEY is required"),
-  VISION_MODEL: z
-    .string()
-    .optional()
-    .transform((val) => (val && val.trim().length > 0 ? val.trim() : "claude-sonnet-5-5")),
+  ...aiConfigSchema.shape,
 
-  SUPABASE_URL: z.string().url("SUPABASE_URL must be a valid URL"),
-  SUPABASE_SERVICE_ROLE_KEY: z
-    .string()
-    .min(1, "SUPABASE_SERVICE_ROLE_KEY is required"),
-  SUPABASE_BUCKET: z.string().min(1, "SUPABASE_BUCKET is required"),
+  ...storageConfigSchema.shape,
 
   AGENT_SWEEP_SECRET: z.string().min(1, "AGENT_SWEEP_SECRET is required"),
   DEMO_MODE: booleanString(false),

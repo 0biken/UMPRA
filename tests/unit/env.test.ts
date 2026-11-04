@@ -9,7 +9,7 @@ const validBaseEnv: Record<string, string> = {
   PAYPAL_CLIENT_ID: "client-id",
   PAYPAL_CLIENT_SECRET: "client-secret",
   PAYPAL_WEBHOOK_ID: "webhook-id",
-  ANTHROPIC_API_KEY: "sk-ant-test",
+  GEMINI_API_KEY: "test-gemini-key",
   SUPABASE_URL: "https://project.supabase.co",
   SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
   SUPABASE_BUCKET: "screenshots",
@@ -22,7 +22,7 @@ describe("env validation (T-003)", () => {
     expect(parsed.APP_URL).toBe("http://localhost:3000");
     expect(parsed.PAYPAL_ENV).toBe("sandbox");
     expect(parsed.PAYPAL_WEBHOOK_VERIFY).toBe(true);
-    expect(parsed.VISION_MODEL).toBe("claude-sonnet-5-5");
+    expect(parsed.VISION_MODEL).toBe("gemini-flash-latest");
     expect(parsed.DEMO_MODE).toBe(false);
     expect(parsed.MATCH_TIMEOUT_MIN).toBe(30);
     expect(parsed.SECOND_SUBMISSION_TIMEOUT_MIN).toBe(15);

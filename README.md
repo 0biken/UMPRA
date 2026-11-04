@@ -9,7 +9,7 @@ Eight players pay in. Two screenshots decide each match. One host tap releases t
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=nextdotjs)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 ![PayPal](https://img.shields.io/badge/PayPal-sandbox-003087?logo=paypal&logoColor=white)
-![Claude](https://img.shields.io/badge/Vision-Claude-d97757)
+![Gemini](https://img.shields.io/badge/Vision-Gemini-d97757)
 ![Postgres](https://img.shields.io/badge/Postgres-Supabase-3ecf8e?logo=supabase&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-6e9f18)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -99,7 +99,7 @@ The umpire is an event-driven, idempotent `tick(tournamentId)` plus a scheduled 
 
 | Stage | Who decides | How |
 |---|---|---|
-| Read a screenshot | Claude (vision) | Structured output, validated with zod |
+| Read a screenshot | Gemini (vision) | Structured output, validated with zod |
 | Do the two readings agree? | Deterministic code | Agreement rule in TypeScript |
 | Advance the bracket | Deterministic code | State machine |
 | Payout amounts and recipients | Deterministic code | `src/server/tournament/payout-math.ts` |
@@ -118,7 +118,7 @@ Money calls carry deterministic `PayPal-Request-Id` values. The typed REST servi
 
 ## Where AI is used
 
-Claude (default `claude-sonnet-5-5`, swappable with `VISION_MODEL`) handles three tasks behind a `VisionProvider` interface:
+Gemini (default `gemini-flash-latest`, swappable with `VISION_MODEL`) handles three tasks behind a `VisionProvider` interface:
 
 1. **Vision**: reads result screenshots into structured data.
 2. **Dispute summaries**: writes a short, plain-language brief for the host.
@@ -141,7 +141,7 @@ Claude (default `claude-sonnet-5-5`, swappable with `VISION_MODEL`) handles thre
 
 ## Architecture
 
-**Stack:** Next.js App Router · strict TypeScript · Tailwind · themed Radix/shadcn primitives · Drizzle + postgres.js · Supabase (Postgres and Storage) · Anthropic SDK · jose + bcryptjs · Vitest · Playwright.
+**Stack:** Next.js App Router · strict TypeScript · Tailwind · themed Radix/shadcn primitives · Drizzle + postgres.js · Supabase (Postgres and Storage) · Gemini REST API · jose + bcryptjs · Vitest · Playwright.
 
 ```text
 src/
@@ -164,7 +164,7 @@ Deep dives: [technical architecture](docs/02-TECHNICAL.md) · [auth](docs/03-AUT
 
 ## Run locally
 
-**Prerequisites:** Node.js **22.14+**, npm, a Supabase Postgres project with a private Storage bucket, a PayPal sandbox REST app with Payouts enabled, and Anthropic API access.
+**Prerequisites:** Node.js **22.14+**, npm, a Supabase Postgres project with a private Storage bucket, a PayPal sandbox REST app with Payouts enabled, and Gemini API access.
 
 ```sh
 npm ci
@@ -197,7 +197,7 @@ The seed command requires demo mode and recipient configuration. It creates the 
 | `test:sandbox` | Real PayPal sandbox suite (gated by `RUN_SANDBOX_TESTS=1`) |
 | `db:generate` / `db:migrate` / `db:seed` | Drizzle schema, migrations, demo seed |
 | `storage:setup` | Create the private screenshots bucket |
-| `vision:check` / `sandbox:check` | Verify live Claude and PayPal integrations |
+| `vision:check` / `sandbox:check` | Verify live Gemini and PayPal integrations |
 | `screenshots:generate` | Render generic demo scoreboards |
 | `audit:repo` | Repository audit |
 
@@ -244,7 +244,7 @@ A Blueprint file alone is not a deployment. See the [release checklist](docs/10-
 ## AI tools used
 
 - **OpenAI Codex** assisted implementation, debugging, tests, and documentation.
-- **Anthropic Claude** (default `claude-sonnet-5-5`, configurable) powers the three product AI tasks above.
+- **Google Gemini** (default `gemini-flash-latest`, configurable) powers the three product AI tasks above.
 - No AI image generator: the scoreboard PNGs are rendered by our own code.
 
 ## License

@@ -53,7 +53,7 @@ If you are blocked or the docs conflict, stop and ask the human. Do not invent a
 4. **Agent runtime:** an idempotent, event-driven `tick(tournamentId)` plus a sweep endpoint called on a schedule. It is not a long-lived process, so it survives restarts.
 5. **Disputes are per match.** The tournament stays `in_progress` (or `results_pending` for the final) while a match is disputed. This replaces the PRD's tournament-level `disputed` state with no loss of behavior.
 6. **Tournament creation:** form first, plain-language parsing second. Both end at the same confirm step.
-7. **Vision model:** Claude via the Anthropic API behind a `VisionProvider` interface. Default `VISION_MODEL=claude-sonnet-5-5`, swappable by env var.
+7. **Vision model:** Gemini via the Gemini API behind a `VisionProvider` interface. Default `VISION_MODEL=gemini-flash-latest`, swappable by env var.
 8. **ORM and DB:** Postgres on Supabase, Drizzle ORM. Screenshots in Supabase Storage.
 9. **UI:** Next.js App Router, Tailwind, shadcn/ui primitives re-themed with the design tokens. Single light theme. Mobile-first (design at 360px width first).
 10. **Demo game:** a generic football-style scoreboard rendered by our own screenshot generator. Do **not** use FIFA or other third-party logos or names anywhere in the app, repo, or demo video (the submission rules forbid third-party trademarks in the video).
@@ -61,7 +61,7 @@ If you are blocked or the docs conflict, stop and ask the human. Do not invent a
 
 ## Stack
 
-Next.js (latest stable, App Router) · TypeScript strict · Tailwind · shadcn/ui · Drizzle ORM · postgres.js · zod · jose + bcryptjs (auth) · `@anthropic-ai/sdk` (vision) · Vitest · Playwright (one smoke test) · Render (hosting).
+Next.js (latest stable, App Router) · TypeScript strict · Tailwind · shadcn/ui · Drizzle ORM · postgres.js · zod · jose + bcryptjs (auth) · Gemini REST API (vision) · Vitest · Playwright (one smoke test) · Render (hosting).
 
 ## Code conventions
 

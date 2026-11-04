@@ -78,7 +78,7 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
   AC: oversize or wrong-type files rejected with a clear message.
 - [x] **T-041 Submission endpoint** [CORE]. needs T-040, T-022. `POST /api/matches/:id/submissions` multipart; only the two players of an `awaiting_results` match; one submission per player; replace allowed until the match is evaluated.
   AC: a non-participant gets 403; after evaluation, replacement is refused.
-- [x] **T-042 Vision provider** [CORE]. needs T-003. `VisionProvider` interface, Anthropic implementation, zod-validated JSON (`05 §Vision schema`), up to 2 retries on malformed output, then `unreadable`.
+- [x] **T-042 Vision provider** [CORE]. needs T-003. `VisionProvider` interface, Gemini implementation, zod-validated JSON (`05 §Vision schema`), up to 2 retries on malformed output, then `unreadable`.
   AC: malformed JSON, missing fields, and out-of-range confidence each produce `malformed` or `unreadable`, never a crash.
 - [x] **T-043 Agreement rule** [CORE]. needs T-042. Pure function `evaluateSubmissions(match, subs, players)` returning `confirm`, `dispute(reason)`, or `wait`, per `05 §Agreement rule`.
   AC: table-driven tests for every row in the rule table.
@@ -86,6 +86,9 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
   AC: a dispute exists for every non-confirm outcome; summary never states amounts.
 - [x] **T-045 Dispute resolution** [CORE]. needs T-044. `POST /api/disputes/:id/resolve` (host only): pick winner A or B plus a note; agent resumes on the next tick.
   AC: only the tournament host can resolve; resolving twice is a no-op.
+
+- [x] **T-046 Gemini provider migration** [CORE]. Replace Anthropic with Gemini for vision, summaries and plain-language setup.
+  AC: server-only REST adapter, validated output, provider tests, updated env and docs; live verification remains a release gate.
 
 ## M5 — The umpire (see `05`)
 
@@ -196,7 +199,7 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 - `T-038` — Implemented `expireStalePendingEntries` (15-min timeout) and automatic refund when an expired entry captures late (`EC-P8`).
 - `T-040` — Implemented `src/server/storage.ts` (`validateScreenshotUpload`, `SupabaseStorageProvider`, `MemoryStorageProvider`) enforcing 5 MB max size and PNG/JPEG/WebP mime types (`EC-R14`).
 - `T-041` — Implemented `submitMatchScreenshot` (`src/server/tournament/submissions.ts`) and `POST /api/matches/:id/submissions` restricting uploads to the two participants of an `awaiting_results` match and allowing replacement until evaluation (`EC-R13`).
-- `T-042` — Implemented `ExtractionSchema`, `parseVisionExtractionOutput`, `runVisionExtractionWithRetries`, `FakeVision`, and `AnthropicVisionProvider` (`src/server/agent/vision/`) with up to 2 retries on malformed output before marking `unreadable` (`EC-R6`, `EC-R7`).
+- `T-042` — Implemented `ExtractionSchema`, `parseVisionExtractionOutput`, `runVisionExtractionWithRetries`, `FakeVision`, and `GeminiVisionProvider` (`src/server/agent/vision/`) with up to 2 retries on malformed output before marking `unreadable` (`EC-R6`, `EC-R7`).
 - `T-043` — Implemented `evaluateSubmissions` (`src/server/agent/evaluate.ts`) with table-driven unit tests for all 9 rows of `05 §Agreement rule` (`EC-R1` to `EC-R5`, `EC-R10`, `EC-R11`).
 - `T-044` — Implemented `generateDisputeSummary`, `sanitizeDisputeSummary`, `buildDisputeFallbackSummary` (`src/server/agent/summarize-dispute.ts`), and `openMatchDispute` (`src/server/tournament/disputes.ts`), guaranteeing summaries never mention dollar amounts.
 - `T-045` — Implemented `resolveDisputeByHost` (`src/server/tournament/disputes.ts`) and `POST /api/disputes/:id/resolve` with host ownership check (`EC-A1`) and idempotent double-resolution handling (`EC-R12`).
@@ -222,3 +225,5 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 - `Phase 3 player flows` (T-086, T-087) - Join form validates on submit with inline errors, stays busy through the PayPal redirect, and notes the 15-minute hold; `/play` explains failed, cancelled and unmatched returns without claiming the player wasn't charged; match panel shows scores from the player's side and covers waiting-for-opponent, knocked-out, runner-up and champion states; uploader clears after upload, can re-pick the same file, has Cancel and a preparing state. Walked join, validation, return banner, upload, result and elimination in the browser at 360px; checked 768 and 1280. Surprise: a shell-escaped regex (`[^s@]`) rejected any email containing "s"; only the live walk caught it.
 - `Phase 4 host flows` (T-082, T-083, T-088, T-089) - Payout review: stacked recipient rows on phones with amounts visible, plain statuses, one trail line with correct plurals, Confirm inside the first screen, "Paid." receipt string, sending banner; money calls untouched. Shared `Dialog` now returns focus to its opener. Dispute view reloads silently and hides the ruling as soon as it succeeds; screenshots show a placeholder until loaded. Dashboard shows one "New tournament" button when empty; create flow explains disabled buttons and has 44px keyboard tabs. Walked create, dispute ruling, payout confirm (Escape, focus return, send on the local fake PayPal), receipt and refresh at 360px; payout table at 1280. Surprise: the browser pane being hidden stops lazy images from loading, which looked like a bug until checked.
 - `Phase 5 accessibility` (T-092) - Compact buttons keep a 36px look with a 44px tap area; bracket round chips are 44px with `aria-pressed`; input borders moved to `muted` (line-strong was 1.8:1 on paper, doc `07` updated); logo, tournament title and wrong-role links are 44px; dispute screenshot names are h2. A Playwright DOM check (15 pages, 3 roles, 360/768/1280px) reports 0 issues, a Tab walk over 7 pages finds every stop visible with a focus ring, and reduced motion switches off the landing bracket draw. Checked locally only; re-run against the hosted build in T-103. Screen readers not tested. Details in `docs/12-FRONTEND-AUDIT.md`.
+
+- `T-046` — Replaced Anthropic with Gemini using a shared REST adapter and scoped AI configuration; removed the SDK without adding dependencies. Adapter, environment and parser tests pass. Saved credentials remain local; live verification returned HTTP 503 UNAVAILABLE.

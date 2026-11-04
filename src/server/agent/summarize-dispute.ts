@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { generateGeminiText } from "./gemini";
 import { env } from "@/server/env";
 import { DISPUTE_SUMMARY_SYSTEM_PROMPT } from "@/server/agent/prompts";
 import { getDisputeReasonLabel } from "@/server/audit";
@@ -92,28 +92,15 @@ export async function generateDisputeSummary(
   }
 
   // In unit test environment with placeholder key, use deterministic template directly
-  if (env.ANTHROPIC_API_KEY.startsWith("test-")) {
+  if (env.GEMINI_API_KEY.startsWith("test-")) {
     return buildDisputeFallbackSummary(facts);
   }
 
   try {
-    const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
-    const response = await client.messages.create({
-      model: env.VISION_MODEL,
-      max_tokens: 180,
-      temperature: 0,
+    const rawText = await generateGeminiText({
       system: DISPUTE_SUMMARY_SYSTEM_PROMPT,
-      messages: [
-        {
-          role: "user",
-          content: JSON.stringify(facts),
-        },
-      ],
+      text: JSON.stringify(facts),
     });
-
-    const textBlock = response.content.find((b) => b.type === "text");
-    const rawText =
-      textBlock && textBlock.type === "text" ? textBlock.text : "";
     return sanitizeDisputeSummary(rawText, facts);
   } catch {
     return buildDisputeFallbackSummary(facts);

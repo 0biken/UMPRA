@@ -10,11 +10,11 @@ Organizer interviews are still pending. Add 2–3 approved, attributed quotes af
 
 ## What it does
 
-Umpra runs an eight-player single-elimination tournament. Players pay through PayPal sandbox checkout and upload result screenshots. Claude reads each image; deterministic rules confirm agreeing evidence or send unclear results to the host. Winners advance automatically. After the final, code computes the payout and the host reviews and confirms the PayPal batch. Every action is visible in an audit feed.
+Umpra runs an eight-player single-elimination tournament. Players pay through PayPal sandbox checkout and upload result screenshots. Gemini reads each image; deterministic rules confirm agreeing evidence or send unclear results to the host. Winners advance automatically. After the final, code computes the payout and the host reviews and confirms the PayPal batch. Every action is visible in an audit feed.
 
 ## How we built it
 
-Next.js, TypeScript, Tailwind and themed Radix primitives provide a mobile-first interface. Supabase hosts Postgres and private screenshots; Drizzle handles database access. PayPal Orders, capture, refunds, Payouts, signature verification, and status polling sit behind a typed service and audited agent tools. Anthropic Claude handles screenshot extraction, dispute summaries and plain-language setup. The model cannot select payment amounts or release money.
+Next.js, TypeScript, Tailwind and themed Radix primitives provide a mobile-first interface. Supabase hosts Postgres and private screenshots; Drizzle handles database access. PayPal Orders, capture, refunds, Payouts, signature verification, and status polling sit behind a typed service and audited agent tools. Google Gemini handles screenshot extraction, dispute summaries and plain-language setup. The model cannot select payment amounts or release money.
 
 We evaluated the PayPal Agent Toolkit and kept direct REST to preserve our explicit request IDs, approval boundary and narrow typed service. See the source-linked decision in `04-PAYPAL.md`.
 

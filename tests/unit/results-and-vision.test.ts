@@ -253,8 +253,8 @@ describe("screenshots, vision parsing, agreement rule, and disputes (T-040 to T-
     // Transport error on first attempt leaves status `pending` for next tick; 2nd transport failure escalates to `unreadable` (EC-R7)
     const failingVision = new FakeVision();
     failingVision.enqueue(
-      new Error("Anthropic 503 timeout"),
-      new Error("Anthropic 503 timeout")
+      new Error("Gemini 503 timeout"),
+      new Error("Gemini 503 timeout")
     );
     const attempt1 = await runVisionExtractionWithRetries(
       failingVision,

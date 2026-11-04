@@ -43,7 +43,7 @@ This checklist distinguishes local code from verified service behavior. Do not m
 
 `render.yaml` builds with `npm ci`, runs `db:migrate` before starting, checks `/api/health`, and sweeps every minute. Run `storage:setup` once with the service role key. RLS is enabled without browser policies on all ten application tables because custom Umpra JWTs are not Supabase Auth tokens. Use the privileged database connection for server queries. Never expose the database URL or service role key to clients.
 
-The test server is not a deployable demo: `UMPRA_E2E=1` requires development, in-memory Postgres, loopback APP_URL and exact test credentials; production attempts refuse. Hosted demos use actual PayPal, Supabase and Anthropic providers.
+The test server is not a deployable demo: `UMPRA_E2E=1` requires development, in-memory Postgres, loopback APP_URL and exact test credentials; production attempts refuse. Hosted demos use actual PayPal, Supabase and Gemini providers.
 
 ## Submission gates
 

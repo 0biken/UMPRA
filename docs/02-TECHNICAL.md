@@ -11,7 +11,7 @@
                        │   auth ─ tournament ─ paypal ─ agent ─ db  │
                        └───────┬───────────────┬───────────┬────────┘
                                │               │           │
-                       Postgres (Supabase)   PayPal      Anthropic API
+                       Postgres (Supabase)   PayPal      Gemini API
                        + Storage (screens)   sandbox     (vision + text)
                                ▲               │
                                │   webhooks    │
@@ -60,7 +60,7 @@ src/
     auth/{session.ts,password.ts,guards.ts}
     tournament/{state-machine.ts,bracket.ts,payout-math.ts,service.ts,config.ts}
     paypal/{client.ts,orders.ts,payouts.ts,refunds.ts,webhooks.ts,fake.ts}
-    agent/{tick.ts,tools.ts,evaluate.ts,vision/{provider.ts,anthropic.ts,schema.ts},parse-tournament.ts,summarize-dispute.ts,prompts/}
+    agent/{tick.ts,tools.ts,evaluate.ts,vision/{provider.ts,gemini.ts,schema.ts},parse-tournament.ts,summarize-dispute.ts,prompts/}
     storage.ts
   lib/{money.ts,ids.ts,errors.ts}
 scripts/{seed.ts,sandbox-check.ts,make-screenshots.ts}
@@ -79,8 +79,8 @@ docs/
 | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` | yes | Sandbox REST app credentials |
 | `PAYPAL_WEBHOOK_ID` | yes | From the webhook registered in the PayPal dashboard |
 | `PAYPAL_WEBHOOK_VERIFY` | no | Default `true`. Keep true everywhere except local unit tests |
-| `ANTHROPIC_API_KEY` | yes | Vision and text calls |
-| `VISION_MODEL` | no | Default `claude-sonnet-5-5` |
+| `GEMINI_API_KEY` | yes | Vision and text calls |
+| `VISION_MODEL` | no | Default `gemini-flash-latest` |
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_BUCKET` | yes | Screenshot storage |
 | `AGENT_SWEEP_SECRET` | yes | Shared secret for `/api/agent/*` |
 | `DEMO_MODE` | no | `true` enables demo login and demo controls |
