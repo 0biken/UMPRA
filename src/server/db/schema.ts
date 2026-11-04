@@ -321,6 +321,7 @@ export const payouts = pgTable(
     tournamentId: uuid("tournament_id")
       .notNull()
       .references(() => tournaments.id),
+    recipientPaypalEmail: text("recipient_paypal_email").notNull(),
     recipientId: uuid("recipient_id")
       .notNull()
       .references(() => users.id),

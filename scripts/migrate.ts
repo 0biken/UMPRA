@@ -1,24 +1,13 @@
-import { closeDatabase, getDb, runMigrations } from "@/server/db";
-
+import { closeDatabase, getDb, runMigrations } from "../src/server/db";
+import { MigrationReconciliationError } from "../src/server/db/migrate";
+import { safeSetupError } from "../src/server/setup-config";
 async function main() {
-  const db = getDb();
-  await runMigrations(db);
-  console.log(
-    JSON.stringify({
-      level: "info",
-      msg: "Database migrations applied successfully",
-    })
-  );
-  await closeDatabase();
+  try {
+    await runMigrations(getDb());
+    console.log("Database migrations applied atomically and schema verified.");
+  } finally { await closeDatabase(); }
 }
-
-main().catch((err) => {
-  console.error(
-    JSON.stringify({
-      level: "error",
-      msg: "Database migration failed",
-      error: err instanceof Error ? err.message : String(err),
-    })
-  );
-  process.exit(1);
+main().catch(error => {
+  console.error(error instanceof MigrationReconciliationError ? error.message : safeSetupError(error));
+  process.exitCode = 1;
 });

@@ -203,6 +203,7 @@ create table payouts (
   id uuid primary key default gen_random_uuid(),
   tournament_id uuid not null references tournaments(id),
   recipient_id uuid not null references users(id),
+  recipient_paypal_email text not null,          -- frozen at draft time; review/send/retry use this
   place int not null,
   amount_cents int not null check (amount_cents > 0),
   status text not null default 'drafted'
@@ -343,3 +344,15 @@ Hashed passwords (bcrypt) · httpOnly, secure, sameSite=lax session cookie · Or
 - `DEMO_PAYPAL_RECIPIENTS`: optional generally, required for demo bot filling/seeding; comma-separated eight sandbox personal recipient emails in player order. `DEMO_BUYER_EMAIL` / `DEMO_BUYER_PASSWORD`: optional sandbox credentials intentionally displayed only in demo mode.
 - `SANDBOX_APPROVED_ORDER_ID` / `SANDBOX_PAYOUT_RECIPIENT`: integration-test prerequisites; no production accounts.
 - `UMPRA_E2E=1` is internal automated-test configuration, refused outside development with exact local test credentials and in-memory DB. Never set it on Render.
+
+## Backend setup and concurrency hardening (November 4)
+
+Setup commands validate only their own configuration: database/storage/AI use scoped schemas, while application startup still validates the complete environment. Use the Supabase Session pooler over verified TLS on IPv4 networks. Never put credentials in command output.
+
+The migration runner takes a fixed transaction-scoped advisory lock before inspecting history, applies all pending DDL plus history in one transaction, and verifies metadata before commit. It refuses app tables without initial history, schema drift detected by column/constraint/index checks, unknown history, or legacy payout rows before the recipient migration. It never marks partial migrations applied or drops existing data. Original migrations remain unchanged; 0002 adds the frozen payout destination and requires an empty legacy payout table or explicit reconciliation.
+
+Payout recipient addresses are copied from the user at draft creation. Review, approval/send, and retries reference the payout snapshot; a rejected join cannot change the user profile. Migrations never infer a destination or reapprove/resend old payouts.
+
+`backend:check` is read-only and reports database/schema/storage status plus missing application credential names. It exits nonzero until the full configuration is ready, even when database and storage checks pass. `db:verify-access` checks both restricted roles against all app tables and requires RLS with no browser policies. `storage:verify` creates a random temporary fixture, verifies authorized download, 60-second signed read and unsigned denial, then removes and checks cleanup of its own object.
+
+No HTTP route changes. Payout review's existing `paypalEmail` field now comes from `payouts.recipient_paypal_email`.

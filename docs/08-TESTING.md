@@ -111,3 +111,9 @@ One happy path with demo mode: host logs in with the demo button, creates a tour
 ## Coverage expectation
 
 No numeric target. Required: every EC row above has a passing test, and `state-machine`, `payout-math`, `money`, `evaluate`, and the PayPal service modules have thorough unit tests.
+
+## Backend hardening regressions
+
+`backend-hardening.test.ts`: frozen destinations through profile changes/review/approval/send/retry; missing snapshot refusal; rejected-join profile preservation; screenshot replacement during extraction; concurrent extraction with one committed audit; slow summaries without DB locks and reevaluation after new evidence.
+
+`migration-hardening.test.ts`: scoped setup config, interruption rollback/resumption, concurrent runners, partial-schema refusal, legacy payout refusal, and RLS reads/writes under restricted roles even with table grants. Live role checks are additionally run through `npm run db:verify-access`.

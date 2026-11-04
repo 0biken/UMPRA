@@ -25,14 +25,14 @@ This checklist distinguishes local code from verified service behavior. Do not m
 | EC-S2 (parser acceptance) | `tests/unit/parse-tournament.test.ts` and `release-regressions.test.ts`: unsupported requests, model normalization, malformed fallback |
 | Additional release boundaries | `tests/unit/release-regressions.test.ts`: bot concurrency/idempotency, seed reruns, zero-pool rejection, actual stored images, private read permissions, public redaction, Data API RLS, $5-funded complete lifecycle |
 
-## External release gates — pending credentials
+## External release gates
 
 - [ ] Create sandbox business REST app and personal buyer/recipient accounts; fund sandbox business balance and confirm Payouts permission.
 - [ ] Configure `.env.local` without sharing secrets in chat. Set eight demo recipient emails; they must resolve to the sandbox accounts used for payout acceptance.
 - [ ] Run `npm run sandbox:check`; record order, capture and settled payout batch IDs plus human receipt confirmation (T-031).
-- [ ] Run `npm run vision:check`; verify real screenshot extraction with the account's configured model.
+- [ ] Run `npm run vision:check`; verify real screenshot extraction with the account's configured model. Gemini migration is implemented; the November 4 live attempt returned HTTP 503 UNAVAILABLE, so account/model verification remains pending.
 - [ ] Run the gated sandbox suite with a fresh approved order; record pass/fail and any PayPal quirks.
-- [ ] Apply migrations to the intended Supabase database with a privileged server connection; configure and verify a private screenshot bucket.
+- [x] Apply migrations to the intended Supabase database with a privileged server connection; configure and verify a private screenshot bucket. Verified November 4 using the Session pooler, all three migrations and real Storage checks.
 - [ ] Deploy Render Blueprint, set web/cron secrets and APP_URL, seed identities, and register the real sandbox webhook.
 - [ ] Test a real webhook signature, duplicate delivery, and cron sweep; observe reconciliation and timeout handling.
 - [ ] Fresh browser: run the hosted flow including at least one actual sandbox capture, real vision extraction, a host ruling, approved payout, receipt and balanced ledger.
@@ -53,3 +53,17 @@ The test server is not a deployable demo: `UMPRA_E2E=1` requires development, in
 - [ ] Review individual eligibility and current official rules, then submit.
 
 Official deadline checked November 1, 2026: **November 12, 2026, 12:00 noon PST = 21:00 Africa/Lagos**. Aim for November 11. Source: [official rules](https://paypalaihackathon.devpost.com/rules). Eligibility and prize receipt remain a human review; this date check is not an eligibility determination.
+
+## Backend verification — November 4, 2026
+
+- Direct pooler inspection confirmed no existing app tables or migration history before setup. No application data was overwritten; no demo data was seeded.
+- `db:migrate`: atomic application and metadata verification of `0000_initial`, `0001_server_only_rls`, `0002_payout_recipient` passed.
+- `backend:check`: database and private storage ready, ten application tables with RLS, no missing migrations or metadata issues. Overall readiness remains nonzero because `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, and `PAYPAL_WEBHOOK_ID` are missing.
+- `db:verify-access`: both `anon` and `authenticated` denied across all ten app tables; no application browser policies.
+- `storage:verify`: real upload/download, 60-second signed read and unsigned denial passed; temporary image deletion confirmed.
+- Local full suite: 87 tests across 16 files passed. Additional final checks recorded below.
+- Gemini was retried with the saved key: HTTP 503 UNAVAILABLE; not verified successful.
+- PayPal sandbox capture/refund/payout and receipt confirmation remain pending credentials and human checkout approval.
+- `DEMO_MODE=false`; demo seeding is intentionally deferred until eight sandbox recipient emails exist.
+
+- Final local checks: TypeScript and lint passed; production build passed after relocating the existing sweep-auth helper out of the Next.js route exports. Final affected suites also passed (18 setup/AI tests and 11 agent/backend tests). The initial sandbox build directory denial was resolved by running with the required filesystem access.

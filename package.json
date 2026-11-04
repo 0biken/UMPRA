@@ -20,7 +20,10 @@
     "storage:setup": "node --env-file-if-exists=.env.local --import tsx scripts/setup-storage.ts",
     "vision:check": "node --env-file-if-exists=.env.local --import tsx scripts/vision-check.ts",
     "audit:repo": "node scripts/audit-repo.mjs",
-    "screenshots:generate": "node --import tsx scripts/make-screenshots.ts"
+    "screenshots:generate": "node --import tsx scripts/make-screenshots.ts",
+    "backend:check": "node --env-file-if-exists=.env.local --import tsx scripts/backend-check.ts",
+    "storage:verify": "node --env-file-if-exists=.env.local --import tsx scripts/verify-storage.ts",
+    "db:verify-access": "node --env-file-if-exists=.env.local --import tsx scripts/verify-db-access.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",

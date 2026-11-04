@@ -6,6 +6,8 @@ The agent watches tournament state and decides the next action on its own: lock 
 
 Implementation: a deterministic orchestrator (`tick`) that calls tools. The LLM is used for three narrow jobs only: reading a result screenshot, writing a dispute summary, and parsing the host's plain-language description. It never chooses amounts, recipients, or whether money moves.
 
+The model provider is Google Gemini via the server-only `generateContent` REST API (`src/server/agent/gemini.ts`). Set `GEMINI_API_KEY` and optionally `VISION_MODEL` (default `gemini-flash-latest`). Vision and tournament parsing request JSON mode; Zod validation remains authoritative. Blocked, truncated, empty, or malformed responses are unusable evidence and follow the existing retry/escalation rules. Provider HTTP errors omit raw response bodies; requests time out after 60 seconds. No model SDK dependency is required. API reference: https://ai.google.dev/api/generate-content.
+
 ## Tick
 
 `tick(tournamentId)` is idempotent and safe to call at any time. Triggers: payment captured, submission saved, dispute resolved, payout approved, and the scheduled sweep.
@@ -163,3 +165,9 @@ Vision provider down: submissions stay `pending`, retried next tick; after 2 fai
 ## Stretch: autonomous payout toggle (T-104)
 
 Setting `tournaments.auto_release` (default false, added by its own migration). When true, the agent sets `approved_by = null, approved_via = 'auto'` and sends without the host tap. The audit log records this loudly (`payout.auto_approved`). Do not build until all CORE tasks are done.
+
+## Concurrent evidence and summary handling
+
+Extraction calls remain outside transactions. Persistence takes the tournament advisory lock and match row lock, requires the match still awaits results, and compares submission ID, screenshot path, pending status and prior attempt count. Results and their audit event commit together. A stale/concurrent result is discarded without an extraction audit for obsolete evidence.
+
+Uploads share the same tournament advisory lock and match row lock. Evaluation locks match rows in round/position order. Dispute summaries are prepared before the decision transaction, fingerprinted to the match and evidence; the decision is recomputed under lock. Only a matching fingerprint can reuse the prepared summary; changed evidence uses the deterministic template when a dispute is still required. Calls given an existing transaction never invoke a summarizer implicitly.

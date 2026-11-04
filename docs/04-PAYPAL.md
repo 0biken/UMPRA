@@ -146,3 +146,7 @@ Stop and ask the human. The agreed fallback is a `PayoutProvider` interface with
 ## Sandbox facts to remember
 
 Buyers approving a payment must log into a sandbox **personal** account on the PayPal sandbox page. Webhooks need a public URL. The sandbox webhook simulator sends events that do not pass real signature verification, so test verification with real sandbox events on the deployed app, and test handler logic with `FakePayPal` and `PAYPAL_WEBHOOK_VERIFY=false` in unit tests only.
+
+## Frozen recipient safety
+
+Drafting persists `payouts.recipient_paypal_email` with the deterministic amount. Review, sending and retries use that immutable application snapshot rather than the user's mutable profile. Sending refuses a missing/invalid snapshot even after approval. A rejected join does not update profile email. Migration refuses legacy payout records requiring reconciliation; no automatic backfill, reapproval or resend is performed.

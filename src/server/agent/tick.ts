@@ -25,6 +25,49 @@ import type { StorageProvider } from "@/server/storage";
 import type { VisionProvider } from "./vision/provider";
 import type { Extraction } from "./vision/schema";
 import { agentTools } from "./tools";
+import { buildDisputeFallbackSummary, generateDisputeSummary, type DisputeFacts } from "./summarize-dispute";
+import type { DisputeReason } from "./evaluate";
+
+type MatchRow = typeof matches.$inferSelect;
+type SubmissionRow = typeof submissions.$inferSelect;
+
+function factsForMatch(m: MatchRow, subs: SubmissionRow[], tags: Map<string, string>, reason: DisputeReason): DisputeFacts {
+  const player = (id: string | null, fallback: string) => {
+    const sub = subs.find(s => s.playerId === id);
+    return { gamertag: tags.get(id ?? "") ?? fallback, submitted: Boolean(sub),
+      extractionStatus: sub?.extractionStatus, extracted: (sub?.extractedJson as Extraction | null) ?? null };
+  };
+  return { reason, playerA: player(m.playerAId, "Player A"), playerB: player(m.playerBId, "Player B") };
+}
+
+function evidenceVersion(m: MatchRow, subs: SubmissionRow[], facts: DisputeFacts): string {
+  return JSON.stringify([m.playerAId, m.playerBId, m.awaitingSince, facts,
+    [...subs].sort((a, b) => a.id.localeCompare(b.id)).map(s => [s.id, s.screenshotPath, s.extractionStatus, s.attempts, s.createdAt, s.extractedJson])]);
+}
+
+function decide(m: MatchRow, subs: SubmissionRow[], tags: Map<string, string>, now: Date) {
+  return agentTools.evaluateEvidence({ match: { ...m, playerAId: m.playerAId!, playerBId: m.playerBId! }, submissions: subs.map(s => ({ ...s, extractedJson: (s.extractedJson as Extraction | null) ?? null })),
+    players: { playerA: { id: m.playerAId!, gamertag: tags.get(m.playerAId!) ?? "Player A" },
+      playerB: { id: m.playerBId!, gamertag: tags.get(m.playerBId!) ?? "Player B" } }, now,
+    timeouts: { matchTimeoutMin: env.MATCH_TIMEOUT_MIN, secondSubmissionTimeoutMin: env.SECOND_SUBMISSION_TIMEOUT_MIN } });
+}
+
+/** Slow summary generation never holds a transaction, row lock, or advisory lock. */
+async function prepareDisputeSummaries(tournamentId: string, now: Date) {
+  const prepared = new Map<string, { version: string; summary: string }>();
+  const rows = await db.select().from(matches).where(and(eq(matches.tournamentId, tournamentId), eq(matches.status, "awaiting_results")));
+  const players = await db.select().from(entries).where(eq(entries.tournamentId, tournamentId));
+  const tags = new Map(players.map(e => [e.playerId, e.gamertag]));
+  for (const match of rows) {
+    if (!match.playerAId || !match.playerBId) continue;
+    const subs = await db.select().from(submissions).where(eq(submissions.matchId, match.id));
+    const decision = decide(match, subs, tags, now);
+    if (decision.outcome !== "dispute") continue;
+    const facts = factsForMatch(match, subs, tags, decision.reason);
+    prepared.set(match.id, { version: evidenceVersion(match, subs, facts), summary: await generateDisputeSummary(facts) });
+  }
+  return prepared;
+}
 
 export interface TickOptions {
   now?: Date;
@@ -219,6 +262,8 @@ export async function tick(
 
   if (hook) await hook("after_vision_extract");
 
+  const preparedSummaries = await prepareDisputeSummaries(tournamentId, now);
+
   // Step 4: Evaluate matches, open disputes, advance winners, and draft payouts inside advisory lock
   await db.transaction(async (tx) => {
     await tx.execute(
@@ -248,7 +293,7 @@ export async function tick(
       .select()
       .from(matches)
       .where(eq(matches.tournamentId, tournamentId))
-      .orderBy(asc(matches.round), asc(matches.position));
+      .orderBy(asc(matches.round), asc(matches.position)).for("update");
 
     // 4a. Activate any `waiting` match that now has both players assigned
     for (const m of allMatches) {
@@ -279,7 +324,7 @@ export async function tick(
       .select()
       .from(matches)
       .where(eq(matches.tournamentId, tournamentId))
-      .orderBy(asc(matches.round), asc(matches.position));
+      .orderBy(asc(matches.round), asc(matches.position)).for("update");
 
     // 4b. Evaluate each `awaiting_results` match
     for (const m of allMatches.filter((m) => m.status === "awaiting_results")) {
@@ -294,33 +339,7 @@ export async function tick(
         .where(eq(submissions.matchId, m.id))
         .orderBy(asc(submissions.createdAt));
 
-      const evaluableSubs = mSubs.map((s) => ({
-        id: s.id,
-        playerId: s.playerId,
-        extractionStatus: s.extractionStatus,
-        extractedJson: (s.extractedJson as Extraction | null) ?? null,
-        confidence: s.confidence ?? null,
-        createdAt: s.createdAt,
-      }));
-
-      const decision = agentTools.evaluateEvidence({
-        match: {
-          id: m.id,
-          playerAId: m.playerAId,
-          playerBId: m.playerBId,
-          awaitingSince: m.awaitingSince,
-        },
-        submissions: evaluableSubs,
-        players: {
-          playerA: { id: m.playerAId, gamertag: tagA },
-          playerB: { id: m.playerBId, gamertag: tagB },
-        },
-        now,
-        timeouts: {
-          matchTimeoutMin: env.MATCH_TIMEOUT_MIN,
-          secondSubmissionTimeoutMin: env.SECOND_SUBMISSION_TIMEOUT_MIN,
-        },
-      });
+      const decision = decide(m, mSubs, tagByPlayer, now);
 
       if (decision.outcome === "confirm") {
         assertMatchTransition(m.status, "confirmed");
@@ -357,29 +376,12 @@ export async function tick(
           { txOrDb: tx, now }
         );
       } else if (decision.outcome === "dispute") {
-        const subA = evaluableSubs.find((s) => s.playerId === m.playerAId);
-        const subB = evaluableSubs.find((s) => s.playerId === m.playerBId);
-
+        const facts = factsForMatch(m, mSubs, tagByPlayer, decision.reason);
+        const prepared = preparedSummaries.get(m.id);
+        const summary = prepared?.version === evidenceVersion(m, mSubs, facts)
+          ? prepared.summary : buildDisputeFallbackSummary(facts);
         await agentTools.openDispute(
-          {
-            matchId: m.id,
-            tournamentId,
-            facts: {
-              reason: decision.reason,
-              playerA: {
-                gamertag: tagA,
-                submitted: Boolean(subA),
-                extractionStatus: subA?.extractionStatus,
-                extracted: subA?.extractedJson ?? null,
-              },
-              playerB: {
-                gamertag: tagB,
-                submitted: Boolean(subB),
-                extractionStatus: subB?.extractionStatus,
-                extracted: subB?.extractedJson ?? null,
-              },
-            },
-          },
+          { matchId: m.id, tournamentId, facts, summaryOverride: summary },
           { txOrDb: tx, now }
         );
       }
@@ -390,7 +392,7 @@ export async function tick(
       .select()
       .from(matches)
       .where(eq(matches.tournamentId, tournamentId))
-      .orderBy(asc(matches.round), asc(matches.position));
+      .orderBy(asc(matches.round), asc(matches.position)).for("update");
 
     for (const m of allMatches) {
       if (m.status === "disputed") {

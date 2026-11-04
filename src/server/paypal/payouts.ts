@@ -101,6 +101,7 @@ export async function draftTournamentPayouts(
     amountCents: number;
   }> = [];
 
+  const destinationByPlace = new Map<number, string>();
   for (const item of computed) {
     const recipientId = recipientByPlace[item.place];
     if (!recipientId) {
@@ -141,6 +142,7 @@ export async function draftTournamentPayouts(
       );
     }
 
+    destinationByPlace.set(item.place, userRow.paypalEmail);
     auditItems.push({
       place: item.place,
       gamertag,
@@ -156,6 +158,7 @@ export async function draftTournamentPayouts(
       .values({
         tournamentId,
         recipientId,
+        recipientPaypalEmail: destinationByPlace.get(item.place)!,
         place: item.place,
         amountCents: item.amountCents,
         status: "drafted",
@@ -273,23 +276,13 @@ export async function sendPayoutBatch(
 
   const batchItems = [];
   for (const row of targetRows) {
-    const [recipient] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, row.recipientId))
-      .limit(1);
-
-    if (!recipient?.paypalEmail) {
-      throw new AppError(
-        "VALIDATION",
-        `Recipient for place ${row.place} has no PayPal email.`,
-        400
-      );
+    if (!row.recipientPaypalEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.recipientPaypalEmail)) {
+      throw new AppError("VALIDATION", "Payout has no frozen PayPal destination. Reconcile and review it before sending.", 400);
     }
 
     batchItems.push({
       senderItemId: row.senderItemId,
-      receiverEmail: recipient.paypalEmail,
+      receiverEmail: row.recipientPaypalEmail,
       amountCents: row.amountCents,
       note: row.place === 1 ? "1st place" : `${row.place}nd place`,
     });
@@ -740,7 +733,7 @@ export async function getPayoutReviewData(
       recipientId: row.recipientId,
       gamertag: e?.gamertag ?? u?.displayName ?? "Winner",
       displayName: u?.displayName ?? "Winner",
-      paypalEmail: u?.paypalEmail ?? null,
+      paypalEmail: row.recipientPaypalEmail,
       amountCents: row.amountCents,
       status: row.status,
       senderBatchId: row.senderBatchId,

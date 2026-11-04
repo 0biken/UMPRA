@@ -23,7 +23,7 @@ import {
 } from "@/server/tournament/service";
 import { agentTools } from "@/server/agent/tools";
 import { sweepActiveTournaments, tick } from "@/server/agent/tick";
-import { assertSweepSecret } from "@/app/api/agent/sweep/route";
+import { assertSweepSecret } from "@/server/agent/auth";
 import { listTournamentActivity } from "@/server/audit";
 import {
   disputes,

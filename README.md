@@ -63,7 +63,7 @@ Grassroots gaming tournaments usually run on bank transfers, screenshots in grou
 ## Release status
 
 > [!IMPORTANT]
-> Local implementation and automated checks are being completed. A hosted URL, real sandbox money verification, and live vision verification are **pending credentials**. Do not treat local test-provider results as verified external integrations.
+> Supabase database and private screenshot storage are configured and verified. A hosted URL, real PayPal sandbox verification, and successful live Gemini verification remain pending. Do not treat local test-provider results as verified external integrations.
 
 ## Try the judge flow
 
@@ -196,7 +196,8 @@ The seed command requires demo mode and recipient configuration. It creates the 
 | `test:e2e` | Playwright smoke test on an isolated server |
 | `test:sandbox` | Real PayPal sandbox suite (gated by `RUN_SANDBOX_TESTS=1`) |
 | `db:generate` / `db:migrate` / `db:seed` | Drizzle schema, migrations, demo seed |
-| `storage:setup` | Create the private screenshots bucket |
+| `storage:setup` / `storage:verify` | Configure private storage and verify real access, signed reads and cleanup |
+| `backend:check` / `db:verify-access` | Read-only readiness report and restricted database-role checks |
 | `vision:check` / `sandbox:check` | Verify live Gemini and PayPal integrations |
 | `screenshots:generate` | Render generic demo scoreboards |
 | `audit:repo` | Repository audit |

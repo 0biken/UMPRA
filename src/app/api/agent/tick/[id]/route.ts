@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/errors";
 import { tick } from "@/server/agent/tick";
-import { assertSweepSecret } from "@/app/api/agent/sweep/route";
+import { assertSweepSecret } from "@/server/agent/auth";
 
 export async function POST(
   req: Request,

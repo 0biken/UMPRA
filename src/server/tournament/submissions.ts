@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { AppError } from "@/lib/errors";
 import { audit } from "@/server/audit";
 import {
@@ -98,6 +98,7 @@ export async function submitMatchScreenshot(
   const gamertag = playerEntry?.gamertag ?? "Player";
 
   const saved = await db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${match.tournamentId}::text))`);
     // Re-check match status inside transaction
     const [freshMatch] = await tx
       .select()

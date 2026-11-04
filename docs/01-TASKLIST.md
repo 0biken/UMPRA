@@ -21,6 +21,9 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
 - [x] **T-006 Shared libs** [CORE]. needs T-002. `lib/money.ts` (cents helpers, PayPal decimal-string conversion), `lib/errors.ts` (`AppError`), `lib/ids.ts`.
   AC: unit tests cover cents to `"28.00"` and back, rounding, negative rejection.
 
+- [x] **T-007 Setup and migration hardening** [CORE]. Scoped configuration, read-only backend checks, atomic advisory-locked migrations, partial-schema/legacy-payout refusal, and restricted-role checks.
+  AC: setup runs without PayPal credentials; interrupted migrations roll back; concurrent runners deduplicate; RLS denies browser roles.
+
 ## M1 — Authentication (see `03`)
 
 - [x] **T-010 Auth core** [CORE]. needs T-005, T-006. bcrypt hashing, JWT session cookie via jose, `getSession()`, `requireUser(role?)`.
@@ -87,8 +90,11 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
 - [x] **T-045 Dispute resolution** [CORE]. needs T-044. `POST /api/disputes/:id/resolve` (host only): pick winner A or B plus a note; agent resumes on the next tick.
   AC: only the tournament host can resolve; resolving twice is a no-op.
 
-- [x] **T-046 Gemini provider migration** [CORE]. Replace Anthropic with Gemini for vision, summaries and plain-language setup.
-  AC: server-only REST adapter, validated output, provider tests, updated env and docs; live verification remains a release gate.
+- [x] **T-046 Gemini provider migration** [CORE]. User-requested replacement of Anthropic with Gemini for vision, dispute summaries, and plain-language setup.
+  AC: server-only REST adapter, `GEMINI_API_KEY`, configurable `gemini-flash-latest` default, existing validation/fallback rules preserved, provider regression tests and local checks pass. Real API verification remains a release gate in `10`.
+
+- [x] **T-047 Evidence concurrency hardening** [CORE]. Guard extraction writes by screenshot version and attempt; commit extraction/audit together; share tournament/match locks with uploads; prepare summaries outside transactions and recheck evidence.
+  AC: stale and concurrent extractions cannot replace current evidence; slow summaries do not hold locks or apply stale decisions.
 
 ## M5 — The umpire (see `05`)
 
@@ -115,6 +121,9 @@ Doc references use the file number, e.g. `02 §Schema` means `docs/02-TECHNICAL.
   AC: one failed item leaves the tournament `confirmed` with a visible retry for that recipient.
 - [x] **T-064 Ledger and receipt** [CORE]. needs T-063. Ledger lists every payment in and payout out with state; payout receipt view.
   AC: ledger total in minus total out equals zero after a successful payout.
+
+- [x] **T-065 Frozen payout destinations** [CORE]. Freeze recipient PayPal email at draft time; use it in review/send/retry; reject missing destinations; rejected joins do not update profiles.
+  AC: profile changes cannot redirect approved payouts; no legacy payouts are inferred or resent during migration.
 
 ## M7 — Plain-language setup
 
@@ -153,6 +162,8 @@ Audit findings for the existing M8 screens are in `docs/12-FRONTEND-AUDIT.md`. F
 - [x] **T-102 Seed script** [CORE]. needs T-101. Demo host, demo players, ready-to-run scenarios.
 - [ ] **T-103 Deploy to Render** [CORE]. needs T-092, T-102. Web service, env vars, health check, scheduled job hitting `/api/agent/sweep`, PayPal webhook registered to the live URL.
   AC: a stranger completes the whole flow on the hosted link without setup.
+- [x] **T-105 Live Supabase setup** [CORE]. Session pooler configured; three migrations applied atomically; private screenshots bucket configured; real storage upload/read/signed-read/anonymous-denial and cleanup verified; both restricted database roles checked.
+  AC: ten tables, RLS, constraints/index metadata, current migration history and private storage verified. Demo stays disabled until recipient configuration exists.
 - [ ] **T-104 Fully autonomous payout toggle** [STRETCH]. needs T-103 and everything else CORE. Host setting that skips the confirm checkpoint; default off; audited loudly.
 
 ## M10 — Quality and submission
@@ -226,4 +237,6 @@ _(Append one line per completed task: `T-xxx — what changed, anything surprisi
 - `Phase 4 host flows` (T-082, T-083, T-088, T-089) - Payout review: stacked recipient rows on phones with amounts visible, plain statuses, one trail line with correct plurals, Confirm inside the first screen, "Paid." receipt string, sending banner; money calls untouched. Shared `Dialog` now returns focus to its opener. Dispute view reloads silently and hides the ruling as soon as it succeeds; screenshots show a placeholder until loaded. Dashboard shows one "New tournament" button when empty; create flow explains disabled buttons and has 44px keyboard tabs. Walked create, dispute ruling, payout confirm (Escape, focus return, send on the local fake PayPal), receipt and refresh at 360px; payout table at 1280. Surprise: the browser pane being hidden stops lazy images from loading, which looked like a bug until checked.
 - `Phase 5 accessibility` (T-092) - Compact buttons keep a 36px look with a 44px tap area; bracket round chips are 44px with `aria-pressed`; input borders moved to `muted` (line-strong was 1.8:1 on paper, doc `07` updated); logo, tournament title and wrong-role links are 44px; dispute screenshot names are h2. A Playwright DOM check (15 pages, 3 roles, 360/768/1280px) reports 0 issues, a Tab walk over 7 pages finds every stop visible with a focus ring, and reduced motion switches off the landing bracket draw. Checked locally only; re-run against the hosted build in T-103. Screen readers not tested. Details in `docs/12-FRONTEND-AUDIT.md`.
 
-- `T-046` — Replaced Anthropic with Gemini using a shared REST adapter and scoped AI configuration; removed the SDK without adding dependencies. Adapter, environment and parser tests pass. Saved credentials remain local; live verification returned HTTP 503 UNAVAILABLE.
+- `T-046` — Replaced Anthropic with Google Gemini for vision, summaries and prompt parsing using a shared REST adapter; removed the SDK without adding dependencies; updated env, Render and specs. Typecheck/lint pass; 74/75 tests passed initially (one PGlite setup timeout), and all 5 tests in that file passed on isolated rerun. Gemini adapter/env/parser subset: 16/16. Live verification remains pending: Google returned HTTP 503 UNAVAILABLE.
+
+- `T-007` / `T-047` / `T-065` / `T-105` — November 4: implemented approved backend setup plan, preserving the Gemini work and original migrations. Live Supabase initially had no app tables/history; applied 0000/0001/0002, verified ten RLS-protected tables and both browser roles, created/verified private 5 MB screenshot storage and removed the test image. Added 12 regression tests; full suite 87/87. PayPal credentials remain missing; demo seeding stayed disabled. Gemini live check returned HTTP 503; typecheck, lint and production build passed (an existing invalid route-helper export was relocated to the server layer). No dependencies added.

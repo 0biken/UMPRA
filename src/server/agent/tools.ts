@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { AppError } from "@/lib/errors";
 import { audit } from "@/server/audit";
 import {
@@ -340,39 +340,46 @@ export const agentTools = {
       { priorAttempts: sub.attempts }
     );
 
-    await db
-      .update(submissions)
-      .set({
+    const saved = await db.transaction(async tx => {
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${parsed.tournamentId}::text))`);
+      const [match] = await tx.select().from(matches).where(eq(matches.id, sub.matchId)).limit(1).for("update");
+      if (!match || match.status !== "awaiting_results") return false;
+      const updated = await tx.update(submissions).set({
         extractionStatus: result.extractionStatus,
         extractedJson: result.extractedJson,
         confidence: result.confidence,
         attempts: result.attemptsUsed,
-      })
-      .where(eq(submissions.id, sub.id));
+      }).where(and(
+        eq(submissions.id, sub.id), eq(submissions.screenshotPath, sub.screenshotPath),
+        eq(submissions.extractionStatus, "pending"), eq(submissions.attempts, sub.attempts)
+      )).returning({ id: submissions.id });
+      if (!updated.length) return false;
+      if (result.extractionStatus !== "pending") {
+        const ext = result.extractedJson;
+        const scoreSummary =
+          ext && ext.home.score !== null && ext.away.score !== null
+            ? `${ext.home.name ?? "?"} ${ext.home.score} - ${ext.away.score} ${ext.away.name ?? "?"}`
+            : "unreadable";
 
-    if (result.extractionStatus !== "pending") {
-      const ext = result.extractedJson;
-      const scoreSummary =
-        ext && ext.home.score !== null && ext.away.score !== null
-          ? `${ext.home.name ?? "?"} ${ext.home.score} - ${ext.away.score} ${ext.away.name ?? "?"}`
-          : "unreadable";
+        await audit(tx, {
+          tournamentId: parsed.tournamentId,
+          actorType: "agent",
+          action: "evidence.extracted",
+          payload: {
+            submissionId: sub.id,
+            matchId: sub.matchId,
+            gamertag: parsed.gamertag,
+            score: scoreSummary,
+            confidence: result.confidence ?? 0,
+            status: result.extractionStatus,
+          },
+          dedupeKey: `extract:${sub.id}:${sub.screenshotPath}`,
+        });
+      }
 
-      await audit(db, {
-        tournamentId: parsed.tournamentId,
-        actorType: "agent",
-        action: "evidence.extracted",
-        payload: {
-          submissionId: sub.id,
-          matchId: sub.matchId,
-          gamertag: parsed.gamertag,
-          score: scoreSummary,
-          confidence: result.confidence ?? 0,
-          status: result.extractionStatus,
-        },
-        dedupeKey: `extract:${sub.id}:${sub.screenshotPath}`,
-      });
-    }
-
+      return true;
+    });
+    if (!saved) return null;
     return result;
   },
 
@@ -405,6 +412,7 @@ export const agentTools = {
       matchId: string;
       tournamentId: string;
       facts: DisputeFacts;
+      summaryOverride?: string;
     },
     ctx: AgentToolContext = {}
   ) {

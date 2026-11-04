@@ -2,15 +2,9 @@ import { testOverrides } from "@/server/test-overrides";
 import { createClient } from "@supabase/supabase-js";
 import { AppError } from "@/lib/errors";
 import { newId } from "@/lib/ids";
-import { env } from "@/server/env";
+import { parseSetupConfig, storageConfigSchema, MAX_SCREENSHOT_BYTES, ALLOWED_SCREENSHOT_MIMES } from "./setup-config";
 
-export const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024; // 5 MB
-
-export const ALLOWED_SCREENSHOT_MIMES = [
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-] as const;
+export { MAX_SCREENSHOT_BYTES, ALLOWED_SCREENSHOT_MIMES } from "./setup-config";
 
 export type AllowedScreenshotMime = (typeof ALLOWED_SCREENSHOT_MIMES)[number];
 
@@ -138,6 +132,7 @@ export class MemoryStorageProvider implements StorageProvider {
 
 export class SupabaseStorageProvider implements StorageProvider {
   private getClient() {
+    const env = parseSetupConfig(storageConfigSchema);
     return createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
     });
@@ -156,6 +151,7 @@ export class SupabaseStorageProvider implements StorageProvider {
 
     const ext = EXT_BY_MIME[validMime];
     const objectPath = `matches/${params.matchId}/${params.playerId}-${newId()}.${ext}`;
+    const env = parseSetupConfig(storageConfigSchema);
     const supabase = this.getClient();
 
     const { error } = await supabase.storage
@@ -180,6 +176,7 @@ export class SupabaseStorageProvider implements StorageProvider {
     bytes: Uint8Array;
     mimeType: AllowedScreenshotMime;
   }> {
+    const env = parseSetupConfig(storageConfigSchema);
     const supabase = this.getClient();
     const { data, error } = await supabase.storage
       .from(env.SUPABASE_BUCKET)
@@ -210,6 +207,7 @@ export class SupabaseStorageProvider implements StorageProvider {
     path: string,
     expiresInSeconds = 3600
   ): Promise<string> {
+    const env = parseSetupConfig(storageConfigSchema);
     const supabase = this.getClient();
     const { data, error } = await supabase.storage
       .from(env.SUPABASE_BUCKET)

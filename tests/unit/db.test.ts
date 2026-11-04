@@ -223,6 +223,7 @@ describe("database schema and migrations (T-005)", () => {
       .values({
         tournamentId: tournament.id,
         recipientId: player.id,
+        recipientPaypalEmail: "recipient@personal.example.com",
         place: 1,
         amountCents: 2800,
         senderBatchId: `payout-${tournament.id}`,

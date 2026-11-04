@@ -14,6 +14,7 @@ import {
 import { assertMatchTransition } from "./state-machine";
 import { advanceWinner, getRoundName } from "./bracket";
 import {
+  buildDisputeFallbackSummary,
   generateDisputeSummary,
   type DisputeFacts,
 } from "@/server/agent/summarize-dispute";
@@ -55,7 +56,9 @@ export async function openMatchDispute(
   }
 
   const summary =
-    input.summaryOverride ?? (await generateDisputeSummary(input.facts));
+    input.summaryOverride ?? (txOrDb === db
+      ? await generateDisputeSummary(input.facts)
+      : buildDisputeFallbackSummary(input.facts));
 
   const [match] = await txOrDb
     .select()

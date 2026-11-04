@@ -137,12 +137,6 @@ export async function joinTournamentAndCreateOrder(
   const paypal = options?.paypal ?? getPayPalClient();
   const now = options?.now ?? new Date();
 
-  // Save the player's PayPal sandbox email on their user record
-  await db
-    .update(users)
-    .set({ paypalEmail })
-    .where(eq(users.id, input.playerId));
-
   // Step 1: Reserve slot and create/reuse entry + payment inside a transaction locking the tournament row
   const reserved = await db.transaction(async (tx) => {
     await tx.execute(
@@ -258,6 +252,8 @@ export async function joinTournamentAndCreateOrder(
         409
       );
     }
+
+    await tx.update(users).set({ paypalEmail }).where(eq(users.id, input.playerId));
 
     if (existingEntry) {
       // Reactivate a previously cancelled or expired entry for this player
