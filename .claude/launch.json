@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "umpra-local",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/local-check.mjs", "dev"],
+      "port": 3317
+    }
+  ]
+}

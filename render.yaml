@@ -1,0 +1,65 @@
+services:
+  - type: web
+    name: umpra
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run build
+    preDeployCommand: npm run db:migrate
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PAYPAL_ENV
+        value: sandbox
+      - key: PAYPAL_WEBHOOK_VERIFY
+        value: "true"
+      - key: VISION_MODEL
+        value: gemini-flash-latest
+      - key: MATCH_TIMEOUT_MIN
+        value: "30"
+      - key: SECOND_SUBMISSION_TIMEOUT_MIN
+        value: "15"
+      - key: DEMO_MODE
+        value: "true"
+      - key: DEMO_PAYPAL_RECIPIENTS
+        sync: false
+      - key: DEMO_BUYER_EMAIL
+        sync: false
+      - key: DEMO_BUYER_PASSWORD
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_BUCKET
+        value: screenshots
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_WEBHOOK_ID
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: AGENT_SWEEP_SECRET
+        generateValue: true
+      - key: APP_URL
+        sync: false
+
+  - type: cron
+    name: umpra-agent-sweep
+    runtime: node
+    schedule: "* * * * *"
+    buildCommand: npm ci
+    startCommand: >-
+      node -e "fetch(process.env.APP_URL + '/api/agent/sweep', { method: 'POST', headers: { 'x-sweep-secret': process.env.AGENT_SWEEP_SECRET } }).then(r => { if (!r.ok) process.exit(1); })"
+    envVars:
+      - key: APP_URL
+        sync: false
+      - key: AGENT_SWEEP_SECRET
+        sync: false
