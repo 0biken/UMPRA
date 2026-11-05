@@ -1,0 +1,38 @@
+{
+  "voice": "Charon",
+  "style": "Say in a brisk, upbeat product-launch narrator voice",
+  "scenes": [
+    {
+      "id": "problem",
+      "text": "Grassroots gaming tournaments run on bank transfers, screenshots, and trust. Organizers collect fees by hand, argue over blurry results, and pay winners late. Umpra replaces all of that with an AI umpire."
+    },
+    {
+      "id": "describe",
+      "text": "A host describes the tournament in plain words. Eight players, five dollars to enter, a seventy-thirty split. Umpra turns that into terms the host reviews. Once registration opens, the fee and the split are frozen."
+    },
+    {
+      "id": "pay",
+      "text": "Players pay with PayPal. Umpra creates the order, sends the player to approve it, and captures the payment on return. The prize pool only counts money PayPal has verified. In this demo, one real sandbox payment funds the pool, and seven simulated players fill the seats, adding no money."
+    },
+    {
+      "id": "bracket",
+      "text": "When every seat is taken, the tournament locks. The agent draws the bracket, and every action it takes is written to an audit log, in plain sentences."
+    },
+    {
+      "id": "umpire",
+      "text": "After each match, both players upload a screenshot of the result. Gemini reads each one: the names, the score, and how confident it is. When both screenshots agree, the agent confirms the winner and advances the bracket. When they disagree, or an image is unreadable, it never guesses. It opens a dispute, writes a summary for the host, and shows the original images. The host makes the call."
+    },
+    {
+      "id": "release",
+      "text": "After the final, deterministic code, not the model, computes the payout. Seventy percent to the winner, thirty to the runner-up. Three fifty, and one fifty. The host reviews it and taps once to confirm. Only then does Umpra send the money through PayPal Payouts. And the ledger balances to the cent."
+    },
+    {
+      "id": "safe",
+      "text": "The model never decides money. One human checkpoint before funds move. Idempotent requests, so a retry never pays twice. And a full audit log of every agent action."
+    },
+    {
+      "id": "close",
+      "text": "Umpra. The AI umpire for grassroots tournaments. Built with PayPal and Gemini."
+    }
+  ]
+}
