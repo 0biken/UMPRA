@@ -37,3 +37,9 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Demo video build outputs (sources in video/ are committed)
+/video/out/
+/video/audio/
+/video/frames/
+/.playwright-cli/
