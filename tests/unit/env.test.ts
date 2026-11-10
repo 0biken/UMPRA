@@ -66,4 +66,21 @@ describe("env validation (T-003)", () => {
       vi.resetModules();
     }
   });
+
+  it("defers validation during next build, then fails on first read", async () => {
+    vi.resetModules();
+    const originalDbUrl = process.env.DATABASE_URL;
+    const originalPhase = process.env.NEXT_PHASE;
+    delete process.env.DATABASE_URL;
+    process.env.NEXT_PHASE = "phase-production-build";
+    try {
+      const mod = await import("@/server/env");
+      expect(() => mod.env.DATABASE_URL).toThrowError(/DATABASE_URL/);
+    } finally {
+      process.env.DATABASE_URL = originalDbUrl;
+      if (originalPhase === undefined) delete process.env.NEXT_PHASE;
+      else process.env.NEXT_PHASE = originalPhase;
+      vi.resetModules();
+    }
+  });
 });
