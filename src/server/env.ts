@@ -63,4 +63,24 @@ export function parseEnv(rawEnv: Record<string, string | undefined> = process.en
   return parsed.data;
 }
 
-export const env: Env = parseEnv(process.env);
+let cached: Env | undefined;
+
+/** Parses process.env once and caches it; throws with the missing/invalid keys. */
+export function getEnv(): Env {
+  cached ??= parseEnv(process.env);
+  return cached;
+}
+
+/**
+ * Validated env, read lazily. `next build` imports every route to collect page data,
+ * and Render may not have runtime secrets at build time, so validation is deferred
+ * during that phase only. Everywhere else it still fails fast on import, and
+ * src/instrumentation.ts validates again at server boot.
+ */
+export const env: Env = new Proxy({} as Env, {
+  get: (_target, key) => getEnv()[key as keyof Env],
+  // Writes go to the cached object, so test overrides behave as on a plain object.
+  set: (_target, key, value) => Reflect.set(getEnv(), key, value),
+});
+
+if (process.env.NEXT_PHASE !== "phase-production-build") getEnv();

@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { DemoLoginButtons } from "@/components/auth/DemoLoginButtons";
 import { MiniBracketHero } from "@/components/tournament/MiniBracketHero";
 
+// Reads runtime env (demo mode, sandbox buyer); never prerender it at build time.
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   const isDemo = env.DEMO_MODE;
 
